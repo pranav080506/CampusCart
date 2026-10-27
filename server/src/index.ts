@@ -15,6 +15,8 @@ import meetupsRouter from './routes/meetups';
 import supabaseRouter from './routes/supabase';
 import { checkSupabaseHealth } from './services/supabase';
 
+import fs from 'fs';
+
 dotenv.config();
 
 const app = express();
@@ -26,7 +28,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve uploaded product photos statically
-const uploadsPath = path.join(__dirname, '../../public/uploads');
+const uploadsPath = process.env.VERCEL 
+  ? path.join('/tmp', 'uploads') 
+  : path.join(__dirname, '../../public/uploads');
+
+if (!fs.existsSync(uploadsPath)) {
+  fs.mkdirSync(uploadsPath, { recursive: true });
+}
 app.use('/uploads', express.static(uploadsPath));
 
 // API Routes
@@ -53,8 +61,10 @@ app.get('/api/health', async (_req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`[CampusCart Server] Running on http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`[CampusCart Server] Running on http://localhost:${PORT}`);
+  });
+}
 
 export default app;
