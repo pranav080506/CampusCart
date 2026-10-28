@@ -55,6 +55,9 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
   const [counterInput, setCounterInput] = useState<Record<string, number>>({});
   const [counterNote, setCounterNote] = useState<Record<string, string>>({});
   const [showCounterRow, setShowCounterRow] = useState<Record<string, boolean>>({});
+  const [showRaiseRow, setShowRaiseRow] = useState<Record<string, boolean>>({});
+  const [raiseInput, setRaiseInput] = useState<Record<string, number>>({});
+  const [raiseNote, setRaiseNote] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
@@ -127,6 +130,49 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
       }
     } catch (err: any) {
       setActionMsg({ text: err.message || 'Error accepting counter.', type: 'error' });
+    }
+  };
+
+  const handleBuyerRaiseOffer = async (offer: BargainOffer) => {
+    try {
+      const price = raiseInput[offer.id];
+      if (!price || price <= offer.offeredPrice) {
+        setActionMsg({
+          text: `Please enter a raised price higher than ₹${offer.offeredPrice.toLocaleString('en-IN')}.`,
+          type: 'error'
+        });
+        return;
+      }
+      if (offer.counterPrice && price > offer.counterPrice) {
+        setActionMsg({
+          text: `Raised offer cannot exceed seller's counter-offer of ₹${offer.counterPrice.toLocaleString('en-IN')}.`,
+          type: 'error'
+        });
+        return;
+      }
+      if (price >= offer.originalListingPrice) {
+        setActionMsg({
+          text: `Offer must be less than listed price of ₹${offer.originalListingPrice.toLocaleString('en-IN')}.`,
+          type: 'error'
+        });
+        return;
+      }
+
+      const note = raiseNote[offer.id] || '';
+      const res = await api.raiseBargainOffer({
+        offerId: offer.id,
+        raisedPrice: price,
+        message: note
+      });
+      if (res.success) {
+        setActionMsg({ text: res.message, type: 'success' });
+        setShowRaiseRow(prev => ({ ...prev, [offer.id]: false }));
+        fetchAccountData();
+      } else {
+        setActionMsg({ text: res.error || 'Failed to raise offer.', type: 'error' });
+      }
+    } catch (err: any) {
+      setActionMsg({ text: err.message || 'Error raising offer.', type: 'error' });
     }
   };
 
@@ -770,17 +816,24 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
                               </div>
                             </div>
 
-                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
-                              offer.status === 'ACCEPTED'
-                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300'
-                                : offer.status === 'COUNTERED'
-                                ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300'
-                                : offer.status === 'REJECTED'
-                                ? 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-300'
-                                : 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300'
-                            }`}>
-                              {offer.status}
-                            </span>
+                            <div className="flex flex-col items-end gap-1">
+                              <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                                offer.status === 'ACCEPTED'
+                                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300'
+                                  : offer.status === 'COUNTERED'
+                                  ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300'
+                                  : offer.status === 'REJECTED'
+                                  ? 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-300'
+                                  : 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300'
+                              }`}>
+                                {offer.status}
+                              </span>
+                              {offer.raisedCount && offer.raisedCount > 0 && (
+                                <span className="text-[9px] font-bold text-amber-700 bg-amber-100 dark:bg-amber-950 dark:text-amber-300 px-1.5 py-0.2 rounded border border-amber-300">
+                                  🚀 Buyer Raised Offer
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           {/* Price Comparison */}
@@ -796,6 +849,11 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
                               <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950 px-1.5 py-0.2 rounded">
                                 {discountPct}% below listing
                               </span>
+                              {offer.previousOfferedPrice && (
+                                <span className="text-[10px] text-gray-400">
+                                  (Was: ₹{offer.previousOfferedPrice.toLocaleString('en-IN')})
+                                </span>
+                              )}
                             </div>
 
                             {offer.aiDealFeedback && (
@@ -813,6 +871,23 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
                             </p>
                           )}
 
+                          {/* Negotiation History Log */}
+                          {offer.history && offer.history.length > 1 && (
+                            <div className="p-2 rounded-lg bg-gray-50/80 dark:bg-black/20 border border-gray-200 dark:border-gray-800 text-[11px] space-y-1">
+                              <span className="font-bold text-ink-secondary dark:text-gray-400 block text-[10px] uppercase">
+                                💬 Negotiation Activity:
+                              </span>
+                              {offer.history.slice(0, 3).map((h, i) => (
+                                <div key={h.id || i} className="flex items-center justify-between text-ink-secondary dark:text-gray-400 text-[10px]">
+                                  <span>
+                                    {h.actor === 'BUYER' ? '🎓 Buyer' : '💼 Seller'} {h.action.replace('_', ' ').toLowerCase()}: <strong className="text-ink-primary dark:text-white">₹{h.price.toLocaleString('en-IN')}</strong>
+                                    {h.message && ` - "${h.message}"`}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
                           {/* Seller Action Buttons */}
                           {offer.status === 'PENDING' && (
                             <div className="space-y-2 pt-1 border-t border-surface-border dark:border-surface-dark-border">
@@ -823,7 +898,7 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
                                   className="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition-colors flex items-center gap-1 shadow-xs"
                                 >
                                   <Check className="w-3.5 h-3.5" />
-                                  Accept Deal at ₹{offer.offeredPrice}
+                                  Accept Deal at ₹{offer.offeredPrice.toLocaleString('en-IN')}
                                 </button>
 
                                 <button
@@ -889,7 +964,7 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
                                     }
                                     className="py-1.5 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-md shadow-xs transition-colors"
                                   >
-                                    Send Counter-Offer of ₹{inputPrice} →
+                                    Send Counter-Offer of ₹{inputPrice.toLocaleString('en-IN')} →
                                   </button>
                                 </div>
                               )}
@@ -898,7 +973,7 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
 
                           {offer.status === 'COUNTERED' && (
                             <div className="text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-lg border border-amber-200 dark:border-amber-800">
-                              <span>You proposed a counter-price of <strong>₹{offer.counterPrice?.toLocaleString('en-IN')}</strong>. Waiting for {offer.buyerName} to accept.</span>
+                              <span>You proposed a counter-price of <strong>₹{offer.counterPrice?.toLocaleString('en-IN')}</strong>. Waiting for {offer.buyerName} to accept or raise.</span>
                             </div>
                           )}
 
@@ -938,110 +1013,262 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {outgoingOffers.map(offer => (
-                      <div
-                        key={offer.id}
-                        className="p-4 rounded-xl border border-surface-border dark:border-surface-dark-border bg-surface dark:bg-surface-dark-card shadow-xs space-y-3"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            {offer.productImage && (
-                              <img
-                                src={offer.productImage}
-                                alt={offer.productTitle}
-                                className="w-12 h-12 rounded-lg object-cover border border-surface-border dark:border-surface-dark-border shrink-0"
-                              />
-                            )}
-                            <div>
-                              <h5 className="font-heading font-bold text-xs text-ink-primary dark:text-white">
-                                {offer.productTitle}
-                              </h5>
-                              <p className="text-[11px] text-ink-secondary dark:text-gray-400 mt-0.5">
-                                Seller: <strong>{offer.sellerName}</strong>
-                              </p>
+                    {outgoingOffers.map(offer => {
+                      const isRaiseOpen = showRaiseRow[offer.id] || false;
+                      const defaultRaise = offer.counterPrice
+                        ? Math.round((offer.offeredPrice + offer.counterPrice) / 2)
+                        : Math.min(offer.originalListingPrice - 10, offer.offeredPrice + 50);
+                      const currentRaisePrice = raiseInput[offer.id] ?? defaultRaise;
+                      const currentRaiseNote = raiseNote[offer.id] ?? '';
+
+                      return (
+                        <div
+                          key={offer.id}
+                          className="p-4 rounded-xl border border-surface-border dark:border-surface-dark-border bg-surface dark:bg-surface-dark-card shadow-xs space-y-3"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              {offer.productImage && (
+                                <img
+                                  src={offer.productImage}
+                                  alt={offer.productTitle}
+                                  className="w-12 h-12 rounded-lg object-cover border border-surface-border dark:border-surface-dark-border shrink-0"
+                                />
+                              )}
+                              <div>
+                                <h5 className="font-heading font-bold text-xs text-ink-primary dark:text-white">
+                                  {offer.productTitle}
+                                </h5>
+                                <p className="text-[11px] text-ink-secondary dark:text-gray-400 mt-0.5">
+                                  Seller: <strong>{offer.sellerName}</strong>
+                                </p>
+                              </div>
                             </div>
-                          </div>
 
-                          <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
-                            offer.status === 'ACCEPTED'
-                              ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300'
-                              : offer.status === 'COUNTERED'
-                              ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300'
-                              : 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300'
-                          }`}>
-                            {offer.status}
-                          </span>
-                        </div>
-
-                        {/* Price Details */}
-                        <div className="p-2.5 rounded-lg bg-surface-subtle dark:bg-surface-dark-page border border-surface-border dark:border-surface-dark-border flex flex-wrap items-center justify-between gap-2 text-xs">
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-[11px] text-ink-secondary dark:text-gray-400">Your Offer:</span>
-                            <span className="font-heading font-extrabold text-sm text-emerald-600 dark:text-emerald-400">
-                              ₹{offer.offeredPrice.toLocaleString('en-IN')}
-                            </span>
-                            <span className="text-[11px] line-through text-ink-secondary">
-                              ₹{offer.originalListingPrice.toLocaleString('en-IN')}
+                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                              offer.status === 'ACCEPTED'
+                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300'
+                                : offer.status === 'COUNTERED'
+                                ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300'
+                                : 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300'
+                            }`}>
+                              {offer.status}
                             </span>
                           </div>
 
-                          {offer.status === 'PENDING' && (
-                            <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium">
-                              Waiting for {offer.sellerName} to review
-                            </span>
+                          {/* Price Details */}
+                          <div className="p-2.5 rounded-lg bg-surface-subtle dark:bg-surface-dark-page border border-surface-border dark:border-surface-dark-border flex flex-wrap items-center justify-between gap-2 text-xs">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-[11px] text-ink-secondary dark:text-gray-400">Your Current Offer:</span>
+                              <span className="font-heading font-extrabold text-sm text-emerald-600 dark:text-emerald-400">
+                                ₹{offer.offeredPrice.toLocaleString('en-IN')}
+                              </span>
+                              <span className="text-[11px] line-through text-ink-secondary">
+                                ₹{offer.originalListingPrice.toLocaleString('en-IN')}
+                              </span>
+                              {offer.previousOfferedPrice && (
+                                <span className="text-[10px] text-gray-400">
+                                  (Raised from: ₹{offer.previousOfferedPrice.toLocaleString('en-IN')})
+                                </span>
+                              )}
+                            </div>
+
+                            {offer.status === 'PENDING' && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium">
+                                  Waiting for {offer.sellerName} to review
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setRaiseInput(prev => ({ ...prev, [offer.id]: prev[offer.id] || defaultRaise }));
+                                    setShowRaiseRow(prev => ({ ...prev, [offer.id]: !prev[offer.id] }));
+                                  }}
+                                  className="py-1 px-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/70 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-bold text-xs rounded-lg border border-blue-200 dark:border-blue-800 flex items-center gap-1 transition-colors"
+                                >
+                                  <TrendingUp className="w-3.5 h-3.5" />
+                                  {isRaiseOpen ? 'Cancel' : '🚀 Raise Offer'}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Negotiation History Log for Buyer */}
+                          {offer.history && offer.history.length > 1 && (
+                            <div className="p-2 rounded-lg bg-gray-50/80 dark:bg-black/20 border border-gray-200 dark:border-gray-800 text-[11px] space-y-1">
+                              <span className="font-bold text-ink-secondary dark:text-gray-400 block text-[10px] uppercase">
+                                💬 Negotiation Activity:
+                              </span>
+                              {offer.history.slice(0, 3).map((h, i) => (
+                                <div key={h.id || i} className="flex items-center justify-between text-ink-secondary dark:text-gray-400 text-[10px]">
+                                  <span>
+                                    {h.actor === 'BUYER' ? '🎓 You' : '💼 Seller'} {h.action.replace('_', ' ').toLowerCase()}: <strong className="text-ink-primary dark:text-white">₹{h.price.toLocaleString('en-IN')}</strong>
+                                    {h.message && ` - "${h.message}"`}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Counter-Offer Action */}
+                          {offer.status === 'COUNTERED' && offer.counterPrice && (
+                            <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 space-y-2">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="font-bold text-amber-900 dark:text-amber-200">
+                                  Seller Counter-Offer: ₹{offer.counterPrice.toLocaleString('en-IN')}
+                                </span>
+                                <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
+                                  Save ₹{(offer.originalListingPrice - offer.counterPrice).toLocaleString('en-IN')}
+                                </span>
+                              </div>
+                              {offer.sellerMessage && (
+                                <p className="text-[11px] text-amber-800 dark:text-amber-300 italic">
+                                  "{offer.sellerMessage}"
+                                </p>
+                              )}
+                              <div className="flex flex-wrap gap-2 pt-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleBuyerAcceptCounter(offer.id)}
+                                  className="flex-1 py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow"
+                                >
+                                  <Check className="w-3.5 h-3.5" />
+                                  Accept Counter (₹{offer.counterPrice.toLocaleString('en-IN')})
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setRaiseInput(prev => ({ ...prev, [offer.id]: prev[offer.id] || defaultRaise }));
+                                    setShowRaiseRow(prev => ({ ...prev, [offer.id]: !prev[offer.id] }));
+                                  }}
+                                  className="py-2 px-3 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/70 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 font-bold text-xs rounded-lg border border-purple-200 dark:border-purple-800 flex items-center gap-1 transition-colors"
+                                >
+                                  <TrendingUp className="w-3.5 h-3.5" />
+                                  {isRaiseOpen ? 'Cancel' : '🚀 Counter-Raise Offer'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Inline Buyer Raise Offer Drawer */}
+                          {isRaiseOpen && (
+                            <div className="p-3 rounded-lg bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 space-y-2.5 animate-fade-in">
+                              <div className="flex items-center justify-between text-xs font-bold text-blue-900 dark:text-blue-200">
+                                <span>Raise Your Bargain Offer:</span>
+                                <span className="text-[10px] text-blue-600 dark:text-blue-400 font-normal">
+                                  Must be &gt; ₹{offer.offeredPrice.toLocaleString('en-IN')}
+                                </span>
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-2">
+                                <label className="text-xs font-bold text-ink-primary dark:text-gray-200 shrink-0">
+                                  New Offer (₹):
+                                </label>
+                                <input
+                                  type="number"
+                                  min={offer.offeredPrice + 1}
+                                  max={(offer.counterPrice || offer.originalListingPrice) - 1}
+                                  value={currentRaisePrice}
+                                  onChange={e =>
+                                    setRaiseInput(prev => ({
+                                      ...prev,
+                                      [offer.id]: Number(e.target.value)
+                                    }))
+                                  }
+                                  className="w-28 px-2 py-1 bg-white dark:bg-slate-900 border border-blue-300 rounded font-bold text-xs text-ink-primary dark:text-white"
+                                />
+
+                                {/* Increment Pills */}
+                                <div className="flex flex-wrap items-center gap-1">
+                                  {[25, 50, 100].map(inc => {
+                                    const targetPrice = offer.offeredPrice + inc;
+                                    const maxCap = (offer.counterPrice || offer.originalListingPrice) - 1;
+                                    if (targetPrice > maxCap) return null;
+                                    return (
+                                      <button
+                                        key={inc}
+                                        type="button"
+                                        onClick={() => setRaiseInput(prev => ({ ...prev, [offer.id]: targetPrice }))}
+                                        className="text-[10px] py-0.5 px-1.5 rounded bg-white dark:bg-slate-800 border border-blue-200 text-blue-700 dark:text-blue-300 hover:bg-blue-100 font-semibold"
+                                      >
+                                        +₹{inc}
+                                      </button>
+                                    );
+                                  })}
+                                  {offer.counterPrice && (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setRaiseInput(prev => ({
+                                          ...prev,
+                                          [offer.id]: Math.round((offer.offeredPrice + offer.counterPrice!) / 2)
+                                        }))
+                                      }
+                                      className="text-[10px] py-0.5 px-1.5 rounded bg-purple-100 dark:bg-purple-900 border border-purple-200 text-purple-800 dark:text-purple-200 hover:bg-purple-200 font-semibold"
+                                    >
+                                      Meet in Middle (₹{Math.round((offer.offeredPrice + offer.counterPrice) / 2)})
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+
+                              <input
+                                type="text"
+                                placeholder="Optional message to seller (e.g. Can meet at Canteen right now, cash ready)..."
+                                value={currentRaiseNote}
+                                onChange={e =>
+                                  setRaiseNote(prev => ({
+                                    ...prev,
+                                    [offer.id]: e.target.value
+                                  }))
+                                }
+                                className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-blue-300 rounded text-xs text-ink-primary dark:text-white"
+                              />
+
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleBuyerRaiseOffer(offer)}
+                                  className="py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-md shadow-xs transition-colors flex items-center gap-1"
+                                >
+                                  <TrendingUp className="w-3.5 h-3.5" />
+                                  Submit Raised Offer of ₹{currentRaisePrice.toLocaleString('en-IN')} →
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowRaiseRow(prev => ({ ...prev, [offer.id]: false }))}
+                                  className="py-1.5 px-2.5 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Accepted Deal Action */}
+                          {offer.status === 'ACCEPTED' && (
+                            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-3">
+                              <div>
+                                <p className="font-bold text-xs text-emerald-900 dark:text-emerald-200">
+                                  🎉 Offer Accepted at ₹{offer.offeredPrice.toLocaleString('en-IN')}!
+                                </p>
+                                <p className="text-[10px] text-emerald-700 dark:text-emerald-400">
+                                  Bargain price locked in. Add to cart to proceed with on-campus pickup.
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleBuyBargain(offer)}
+                                className="py-2 px-3 bg-brand hover:bg-brand-hover text-white font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 shadow-md active:scale-95 shrink-0"
+                              >
+                                <ShoppingBag className="w-3.5 h-3.5" />
+                                Buy at ₹{offer.offeredPrice} →
+                              </button>
+                            </div>
                           )}
                         </div>
-
-                        {/* Counter-Offer Action */}
-                        {offer.status === 'COUNTERED' && offer.counterPrice && (
-                          <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 space-y-2">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="font-bold text-amber-900 dark:text-amber-200">
-                                Seller Counter-Offer: ₹{offer.counterPrice.toLocaleString('en-IN')}
-                              </span>
-                              <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
-                                Save ₹{(offer.originalListingPrice - offer.counterPrice).toLocaleString('en-IN')}
-                              </span>
-                            </div>
-                            {offer.sellerMessage && (
-                              <p className="text-[11px] text-amber-800 dark:text-amber-300 italic">
-                                "{offer.sellerMessage}"
-                              </p>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => handleBuyerAcceptCounter(offer.id)}
-                              className="w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow"
-                            >
-                              <Check className="w-3.5 h-3.5" />
-                              Accept Counter-Offer of ₹{offer.counterPrice.toLocaleString('en-IN')}
-                            </button>
-                          </div>
-                        )}
-
-                        {/* Accepted Deal Action */}
-                        {offer.status === 'ACCEPTED' && (
-                          <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-3">
-                            <div>
-                              <p className="font-bold text-xs text-emerald-900 dark:text-emerald-200">
-                                🎉 Offer Accepted at ₹{offer.offeredPrice.toLocaleString('en-IN')}!
-                              </p>
-                              <p className="text-[10px] text-emerald-700 dark:text-emerald-400">
-                                Bargain price locked in. Add to cart to proceed with on-campus pickup.
-                              </p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleBuyBargain(offer)}
-                              className="py-2 px-3 bg-brand hover:bg-brand-hover text-white font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 shadow-md active:scale-95 shrink-0"
-                            >
-                              <ShoppingBag className="w-3.5 h-3.5" />
-                              Buy at ₹{offer.offeredPrice} →
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

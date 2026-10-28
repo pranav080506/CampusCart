@@ -130,10 +130,57 @@ export const BargainOfferModal: React.FC<BargainOfferModalProps> = ({
     }
   };
 
+  const handleRaiseOffer = async () => {
+    if (!existingOffer) return;
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    if (offeredPrice <= existingOffer.offeredPrice) {
+      setErrorMessage(`Raised offer must be higher than your current offer of ₹${existingOffer.offeredPrice.toLocaleString('en-IN')}.`);
+      return;
+    }
+
+    if (existingOffer.counterPrice && offeredPrice > existingOffer.counterPrice) {
+      setErrorMessage(`Raised offer cannot exceed seller's counter-offer of ₹${existingOffer.counterPrice.toLocaleString('en-IN')}.`);
+      return;
+    }
+
+    if (offeredPrice >= originalPrice) {
+      setErrorMessage(`Offer price must be lower than listed price of ₹${originalPrice.toLocaleString('en-IN')}.`);
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const res = await api.raiseBargainOffer({
+        offerId: existingOffer.id,
+        raisedPrice: offeredPrice,
+        message: customMessage.trim() || undefined
+      });
+
+      if (res.success && res.offer) {
+        setExistingOffer(res.offer);
+        setSuccessMessage(res.message);
+        onOfferSubmitted?.(res.offer);
+      } else {
+        setErrorMessage(res.error || 'Failed to raise offer.');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Error raising bargain offer.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSendOffer = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
+
+    // If an active offer already exists and buyer is raising it:
+    if (existingOffer && (existingOffer.status === 'PENDING' || existingOffer.status === 'COUNTERED')) {
+      return handleRaiseOffer();
+    }
 
     if (offeredPrice <= 0) {
       setErrorMessage('Please enter an offer price greater than ₹0.');
@@ -150,8 +197,7 @@ export const BargainOfferModal: React.FC<BargainOfferModalProps> = ({
       const res = await api.makeBargainOffer({
         productId: product.id,
         offeredPrice,
-        message: customMessage.trim() || undefined,
-        allowAutoCounter: true
+        message: customMessage.trim() || undefined
       });
 
       if (res.success && res.offer) {
@@ -474,7 +520,9 @@ export const BargainOfferModal: React.FC<BargainOfferModalProps> = ({
               >
                 <Handshake className="w-4 h-4" />
                 <span>
-                  {existingOffer ? 'Update Bargain Offer' : `Send Bargain Offer of ₹${offeredPrice.toLocaleString('en-IN')} →`}
+                  {existingOffer
+                    ? `🚀 Raise Offer to ₹${offeredPrice.toLocaleString('en-IN')} →`
+                    : `Send Bargain Offer of ₹${offeredPrice.toLocaleString('en-IN')} →`}
                 </span>
               </button>
             </form>

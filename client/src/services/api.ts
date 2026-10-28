@@ -480,6 +480,24 @@ export const api = {
     return res.json();
   },
 
+  async raiseBargainOffer(data: {
+    offerId: string;
+    raisedPrice: number;
+    message?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    offer?: BargainOffer;
+    error?: string;
+  }> {
+    const res = await fetch(`${BASE_URL}/bargain/raise-offer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
   async buyAcceptedBargain(offerId: string): Promise<{
     success: boolean;
     message: string;

@@ -97,7 +97,18 @@ class DatabaseStore {
       aiAcceptanceProbability: 82,
       aiDealFeedback: 'Fair Offer (15% discount). High acceptance probability on campus.',
       createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-      updatedAt: new Date(Date.now() - 3600000 * 5).toISOString()
+      updatedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+      history: [
+        {
+          id: 'hist-seed-1',
+          actor: 'BUYER',
+          actorName: 'Rohan Sharma',
+          action: 'OFFER_MADE',
+          price: 550,
+          message: 'Hi Ananya! I have Engineering Graphics workshop tomorrow. Can pay ₹550 cash or UPI right away at B.Tech canteen!',
+          timestamp: new Date(Date.now() - 3600000 * 5).toISOString()
+        }
+      ]
     },
     {
       id: 'off-seed-2',
@@ -119,7 +130,27 @@ class DatabaseStore {
       aiAcceptanceProbability: 70,
       aiDealFeedback: 'Counter-offer active. Close to seller target margin.',
       createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-      updatedAt: new Date(Date.now() - 3600000 * 3).toISOString()
+      updatedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+      history: [
+        {
+          id: 'hist-seed-2a',
+          actor: 'BUYER',
+          actorName: 'Kabir Verma',
+          action: 'OFFER_MADE',
+          price: 950,
+          message: 'Would you do ₹950? Need it for semester exams.',
+          timestamp: new Date(Date.now() - 3600000 * 12).toISOString()
+        },
+        {
+          id: 'hist-seed-2b',
+          actor: 'SELLER',
+          actorName: 'Rohan Sharma',
+          action: 'COUNTERED',
+          price: 1050,
+          message: 'How about ₹1,050? The calculator is practically new with bill & warranty.',
+          timestamp: new Date(Date.now() - 3600000 * 3).toISOString()
+        }
+      ]
     }
   ];
   private meetupSessions: MeetupSession[] = [
@@ -961,26 +992,94 @@ class DatabaseStore {
       aiAcceptanceProbability,
       aiDealFeedback,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      history: [
+        {
+          id: `hist-${Date.now()}-init`,
+          actor: 'BUYER',
+          actorName: buyer.fullName,
+          action: 'OFFER_MADE',
+          price: params.offeredPrice,
+          message: params.buyerMessage || 'Proposed bargain offer to seller.',
+          timestamp: new Date().toISOString()
+        }
+      ]
     };
 
-    // Auto-seller interaction for instant live demo experience
-    if (params.allowAutoCounter || product.sellerId !== this.currentUserId) {
-      if (discountPercent <= 12) {
-        newOffer.status = 'ACCEPTED';
-        newOffer.sellerMessage = `Deal agreed at ₹${params.offeredPrice}! You can pick it up at ${
-          product.preferredMeetupHubs?.[0] || 'B.Tech Canteen'
-        }.`;
-      } else if (discountPercent <= 30) {
-        const counter = Math.round((product.price + params.offeredPrice) / 2);
-        newOffer.status = 'COUNTERED';
-        newOffer.counterPrice = counter;
-        newOffer.sellerMessage = `Hey ${buyer.fullName.split(' ')[0]}! Can we meet in the middle at ₹${counter}? I can hand it over today.`;
-      }
-    }
+    // User requirement: Seller must check the offer themselves and counter by their own choice!
+    // Offer strictly starts as PENDING awaiting seller inspection.
 
     this.bargainOffers.unshift(newOffer);
     return newOffer;
+  }
+
+  public raiseBargainOffer(params: {
+    offerId: string;
+    buyerId?: string;
+    raisedPrice: number;
+    message?: string;
+  }): BargainOffer {
+    const offer = this.getBargainOfferById(params.offerId);
+    if (!offer) {
+      throw new Error('Bargain offer not found.');
+    }
+
+    const buyer = params.buyerId ? this.getUserById(params.buyerId) : this.getCurrentUser();
+    if (buyer && buyer.id !== offer.buyerId && buyer.role !== 'SUPER_ADMIN') {
+      throw new Error('Only the buyer can raise their bargain offer.');
+    }
+
+    if (offer.status !== 'PENDING' && offer.status !== 'COUNTERED') {
+      throw new Error(`Cannot raise offer that is currently ${offer.status}.`);
+    }
+
+    if (params.raisedPrice <= offer.offeredPrice) {
+      throw new Error(`Raised offer must be higher than your previous offer of ₹${offer.offeredPrice.toLocaleString('en-IN')}.`);
+    }
+
+    if (params.raisedPrice >= offer.originalListingPrice) {
+      throw new Error(`Offer must be less than the original listed price of ₹${offer.originalListingPrice.toLocaleString('en-IN')}.`);
+    }
+
+    if (offer.counterPrice && params.raisedPrice > offer.counterPrice) {
+      throw new Error(`Raised offer cannot exceed the seller's counter-offer of ₹${offer.counterPrice.toLocaleString('en-IN')}.`);
+    }
+
+    const previousPrice = offer.offeredPrice;
+    offer.previousOfferedPrice = previousPrice;
+    offer.offeredPrice = params.raisedPrice;
+    offer.counterPrice = undefined; // Cleared so seller can counter on their own again
+    offer.buyerMessage = params.message || `Raised offer to ₹${params.raisedPrice.toLocaleString('en-IN')}`;
+    offer.sellerMessage = undefined;
+    offer.status = 'PENDING'; // Back to seller for checking and manual counter
+    offer.raisedCount = (offer.raisedCount || 0) + 1;
+    offer.updatedAt = new Date().toISOString();
+
+    // Recompute AI deal acceptance gauge
+    const discountPercent = Math.round(((offer.originalListingPrice - params.raisedPrice) / offer.originalListingPrice) * 100);
+    if (discountPercent <= 10) {
+      offer.aiAcceptanceProbability = 94;
+      offer.aiDealFeedback = 'Raised offer gives a very favorable deal to the seller (<=10% discount). Very high chance of acceptance!';
+    } else if (discountPercent <= 20) {
+      offer.aiAcceptanceProbability = 82;
+      offer.aiDealFeedback = 'Revised fair offer (11-20% discount). Great balance for campus peer trade.';
+    } else {
+      offer.aiAcceptanceProbability = 62;
+      offer.aiDealFeedback = 'Raised offer significantly improves seller margin. Awaiting seller response.';
+    }
+
+    if (!offer.history) offer.history = [];
+    offer.history.unshift({
+      id: `hist-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      actor: 'BUYER',
+      actorName: buyer?.fullName || offer.buyerName,
+      action: 'OFFER_RAISED',
+      price: params.raisedPrice,
+      message: params.message || `Raised offer from ₹${previousPrice.toLocaleString('en-IN')} to ₹${params.raisedPrice.toLocaleString('en-IN')}.`,
+      timestamp: new Date().toISOString()
+    });
+
+    return offer;
   }
 
   public respondToBargainOffer(params: {
@@ -1000,19 +1099,48 @@ class DatabaseStore {
       throw new Error('Only the seller of this product can respond to this offer.');
     }
 
+    if (!offer.history) offer.history = [];
+
     if (params.action === 'ACCEPT') {
       offer.status = 'ACCEPTED';
-      offer.sellerMessage = params.sellerMessage || `Accepted! Deal finalized at ₹${offer.offeredPrice}.`;
+      offer.sellerMessage = params.sellerMessage || `Accepted! Deal finalized at ₹${offer.offeredPrice.toLocaleString('en-IN')}.`;
+      offer.history.unshift({
+        id: `hist-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        actor: 'SELLER',
+        actorName: responder?.fullName || offer.sellerName,
+        action: 'ACCEPTED',
+        price: offer.offeredPrice,
+        message: offer.sellerMessage,
+        timestamp: new Date().toISOString()
+      });
     } else if (params.action === 'REJECT') {
       offer.status = 'REJECTED';
       offer.sellerMessage = params.sellerMessage || 'Thank you for the offer, but I cannot sell at this price.';
+      offer.history.unshift({
+        id: `hist-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        actor: 'SELLER',
+        actorName: responder?.fullName || offer.sellerName,
+        action: 'REJECTED',
+        price: offer.offeredPrice,
+        message: offer.sellerMessage,
+        timestamp: new Date().toISOString()
+      });
     } else if (params.action === 'COUNTER') {
-      if (!params.counterPrice || params.counterPrice <= 0 || params.counterPrice >= offer.originalListingPrice) {
-        throw new Error('Counter-offer price must be between buyer offer and listed price.');
+      if (!params.counterPrice || params.counterPrice <= offer.offeredPrice || params.counterPrice >= offer.originalListingPrice) {
+        throw new Error(`Counter-offer price must be between buyer's offer (₹${offer.offeredPrice}) and listed price (₹${offer.originalListingPrice}).`);
       }
       offer.status = 'COUNTERED';
       offer.counterPrice = params.counterPrice;
-      offer.sellerMessage = params.sellerMessage || `How about ₹${params.counterPrice}?`;
+      offer.sellerMessage = params.sellerMessage || `How about ₹${params.counterPrice.toLocaleString('en-IN')}?`;
+      offer.history.unshift({
+        id: `hist-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        actor: 'SELLER',
+        actorName: responder?.fullName || offer.sellerName,
+        action: 'COUNTERED',
+        price: params.counterPrice,
+        message: offer.sellerMessage,
+        timestamp: new Date().toISOString()
+      });
     }
 
     offer.updatedAt = new Date().toISOString();
@@ -1034,9 +1162,22 @@ class DatabaseStore {
       throw new Error('Only the original buyer can accept this counter-offer.');
     }
 
-    offer.offeredPrice = offer.counterPrice;
+    const finalPrice = offer.counterPrice;
+    offer.offeredPrice = finalPrice;
     offer.status = 'ACCEPTED';
     offer.updatedAt = new Date().toISOString();
+
+    if (!offer.history) offer.history = [];
+    offer.history.unshift({
+      id: `hist-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      actor: 'BUYER',
+      actorName: buyer?.fullName || offer.buyerName,
+      action: 'ACCEPTED',
+      price: finalPrice,
+      message: `Buyer accepted seller's counter-offer of ₹${finalPrice.toLocaleString('en-IN')}.`,
+      timestamp: new Date().toISOString()
+    });
+
     return offer;
   }
 }

@@ -59,16 +59,40 @@ router.post('/make-offer', (req: Request, res: Response) => {
       allowAutoCounter: allowAutoCounter !== false
     });
 
-    let confirmationMsg = `Bargain offer of ₹${offer.offeredPrice.toLocaleString('en-IN')} sent to seller!`;
-    if (offer.status === 'ACCEPTED') {
-      confirmationMsg = `Deal Accepted! Seller agreed to your bargain price of ₹${offer.offeredPrice.toLocaleString('en-IN')}.`;
-    } else if (offer.status === 'COUNTERED') {
-      confirmationMsg = `Seller countered with ₹${offer.counterPrice?.toLocaleString('en-IN')}! Review the counter-offer below.`;
+    res.json({
+      success: true,
+      message: `Bargain offer of ₹${offer.offeredPrice.toLocaleString('en-IN')} sent to seller! Waiting for seller to review and respond.`,
+      offer
+    });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/bargain/raise-offer - Buyer raises / re-negotiates their bargain offer
+router.post('/raise-offer', (req: Request, res: Response) => {
+  try {
+    const { offerId, raisedPrice, message } = req.body;
+    if (!offerId || raisedPrice === undefined) {
+      return res.status(400).json({ success: false, error: 'Offer ID and raised price are required.' });
     }
+
+    const priceNum = Number(raisedPrice);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      return res.status(400).json({ success: false, error: 'Please enter a valid numeric raised price.' });
+    }
+
+    const user = db.getCurrentUser();
+    const offer = db.raiseBargainOffer({
+      offerId,
+      buyerId: user.id,
+      raisedPrice: priceNum,
+      message
+    });
 
     res.json({
       success: true,
-      message: confirmationMsg,
+      message: `Offer raised to ₹${offer.offeredPrice.toLocaleString('en-IN')}! Waiting for seller to check and respond.`,
       offer
     });
   } catch (error: any) {

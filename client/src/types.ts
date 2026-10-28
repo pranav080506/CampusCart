@@ -185,6 +185,16 @@ export interface MeetupSession {
 
 export type BargainStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COUNTERED' | 'EXPIRED';
 
+export interface BargainHistoryEntry {
+  id: string;
+  actor: 'BUYER' | 'SELLER';
+  actorName: string;
+  action: 'OFFER_MADE' | 'OFFER_RAISED' | 'COUNTERED' | 'ACCEPTED' | 'REJECTED';
+  price: number;
+  message?: string;
+  timestamp: string;
+}
+
 export interface BargainOffer {
   id: string;
   productId: string;
@@ -206,6 +216,9 @@ export interface BargainOffer {
   aiDealFeedback?: string;
   createdAt: string;
   updatedAt: string;
+  history?: BargainHistoryEntry[];
+  previousOfferedPrice?: number;
+  raisedCount?: number;
 }
 
 export interface CartItem {
