@@ -52,18 +52,12 @@ export const DEFAULT_FIREBASE_CONFIG: FirebaseConfig = {
 
 export const getActiveFirebaseConfig = (): FirebaseConfig => {
   const saved = getSavedFirebaseConfig();
-  if (saved && saved.apiKey && saved.projectId) {
+  if (saved && saved.apiKey && saved.projectId && saved.authDomain?.includes('.firebaseapp.com')) {
     return saved;
   }
 
   const env = (import.meta as any).env || {};
-  let authDomain = env.VITE_FIREBASE_AUTH_DOMAIN || DEFAULT_FIREBASE_CONFIG.authDomain;
-
-  // On deployed domains (e.g. *.vercel.app), use same-origin authDomain.
-  // The Vercel rewrite proxies /__/auth/* to Firebase, eliminating the "missing initial state" error!
-  if (typeof window !== 'undefined' && window.location.hostname && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
-    authDomain = window.location.hostname;
-  }
+  const authDomain = env.VITE_FIREBASE_AUTH_DOMAIN || DEFAULT_FIREBASE_CONFIG.authDomain;
 
   return {
     apiKey: env.VITE_FIREBASE_API_KEY || DEFAULT_FIREBASE_CONFIG.apiKey,

@@ -524,15 +524,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </button>
 
               {/* Instant 1-Click Fast Student Entry */}
-              <button
-                type="button"
-                onClick={() => handleSimulatedGoogleSelect('2023me10452@gibitm.ac.in', 'Rohan Sharma')}
-                disabled={isSubmitting}
-                className="w-full mt-2 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700/60 text-emerald-800 dark:text-emerald-200 font-bold text-xs transition-all flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-60"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <span>Instant Student Login: Enter as Rohan Sharma (ME) →</span>
-              </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => handleSimulatedGoogleSelect('pranavgupta080506@gmail.com', 'Pranav Gupta')}
+                  disabled={isSubmitting}
+                  className="w-full py-2 px-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 border border-blue-300 dark:border-blue-700/60 text-blue-800 dark:text-blue-200 font-bold text-xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.99] disabled:opacity-60"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                  <span>Enter as Pranav Gupta →</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSimulatedGoogleSelect('2023me10452@gibitm.ac.in', 'Rohan Sharma')}
+                  disabled={isSubmitting}
+                  className="w-full py-2 px-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700/60 text-emerald-800 dark:text-emerald-200 font-bold text-xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.99] disabled:opacity-60"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span>Enter as Rohan Sharma →</span>
+                </button>
+              </div>
 
               {/* Divider */}
               <div className="relative my-3">
@@ -979,6 +990,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <p className="text-gray-500 text-[11px]">
                     Click any student account below to test instant Google Workspace admission verification:
                   </p>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSimulatedGoogleSelect('pranavgupta080506@gmail.com', 'Pranav Gupta')}
+                    className="w-full p-2.5 rounded-xl border border-blue-200 dark:border-blue-900 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-left flex items-center justify-between transition-colors"
+                  >
+                    <div>
+                      <p className="font-bold text-ink-primary dark:text-white">Pranav Gupta (Developer & Student)</p>
+                      <p className="text-[11px] text-gray-500 font-mono">pranavgupta080506@gmail.com</p>
+                    </div>
+                    <span className="text-[10px] bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded-full font-bold">
+                      Verified
+                    </span>
+                  </button>
 
                   <button
                     type="button"
