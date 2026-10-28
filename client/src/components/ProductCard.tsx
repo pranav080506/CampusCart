@@ -1,6 +1,6 @@
 import React from 'react';
 import { Product } from '../types';
-import { Heart, Eye, ShoppingBag, ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Heart, Eye, ShoppingBag, ShieldCheck, Sparkles, CheckCircle2, Handshake } from 'lucide-react';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 
@@ -113,6 +113,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 Approval Pending
               </span>
             )}
+
+            {/* Bargain Negotiable Badge */}
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800" title="Price is negotiable with campus seller">
+              <Handshake className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" />
+              Bargainable
+            </span>
           </div>
 
           {/* Title */}
@@ -130,7 +136,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </p>
         </div>
 
-        {/* Pricing & Add to Cart */}
+        {/* Pricing & Actions */}
         <div className="mt-3 pt-3 border-t border-surface-border dark:border-surface-dark-border flex items-center justify-between">
           <div className="flex items-baseline gap-1.5">
             <span className="font-heading font-bold text-base sm:text-lg text-ink-primary dark:text-white">
@@ -143,14 +149,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             )}
           </div>
 
-          {/* Add to Cart Button */}
-          <button
-            onClick={() => addToCart(product.id, 1)}
-            className="p-2 rounded-lg bg-brand-light dark:bg-emerald-950 text-brand dark:text-emerald-300 hover:bg-brand hover:text-white dark:hover:bg-brand dark:hover:text-white transition-colors"
-            title="Add to Cart"
-          >
-            <ShoppingBag className="w-4 h-4" />
-          </button>
+          {/* Actions: Make Offer / Bargain + Add to Cart */}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => onClick(product)}
+              className="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition-colors"
+              title="Bargain / Make Offer"
+            >
+              <Handshake className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => addToCart(product.id, 1)}
+              className="p-2 rounded-lg bg-brand-light dark:bg-emerald-950 text-brand dark:text-emerald-300 hover:bg-brand hover:text-white dark:hover:bg-brand dark:hover:text-white transition-colors"
+              title="Add to Cart"
+            >
+              <ShoppingBag className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

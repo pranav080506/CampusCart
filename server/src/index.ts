@@ -12,6 +12,7 @@ import cartRouter from './routes/cart';
 import wishlistRouter from './routes/wishlist';
 import authRouter from './routes/auth';
 import meetupsRouter from './routes/meetups';
+import bargainRouter from './routes/bargain';
 import supabaseRouter from './routes/supabase';
 import { checkSupabaseHealth } from './services/supabase';
 
@@ -47,6 +48,7 @@ app.use('/api/cart', cartRouter);
 app.use('/api/wishlist', wishlistRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/meetups', meetupsRouter);
+app.use('/api/bargain', bargainRouter);
 app.use('/api/supabase', supabaseRouter);
 
 // Health check endpoint

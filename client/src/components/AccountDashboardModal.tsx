@@ -18,18 +18,22 @@ import {
   UserCheck,
   Users,
   Copy,
-  Check
+  Check,
+  Handshake,
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
-import { MeetupSession, Product } from '../types';
+import { MeetupSession, Product, BargainOffer } from '../types';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 interface AccountDashboardModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenMeetupCoordination: (meetupId?: string) => void;
   onOpenSellModal: () => void;
-  initialTab?: 'buyer' | 'seller';
+  initialTab?: 'buyer' | 'seller' | 'bargains';
 }
 
 export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
@@ -40,11 +44,17 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
   initialTab = 'buyer'
 }) => {
   const { user, college, availableUsers, switchUser } = useAuth();
-  const [activeTab, setActiveTab] = useState<'buyer' | 'seller'>(initialTab);
+  const { addToCart, setIsCartOpen } = useCart();
+  const [activeTab, setActiveTab] = useState<'buyer' | 'seller' | 'bargains'>(initialTab);
 
   const [buyerMeetups, setBuyerMeetups] = useState<MeetupSession[]>([]);
   const [sellerMeetups, setSellerMeetups] = useState<MeetupSession[]>([]);
   const [sellerProducts, setSellerProducts] = useState<Product[]>([]);
+  const [incomingOffers, setIncomingOffers] = useState<BargainOffer[]>([]);
+  const [outgoingOffers, setOutgoingOffers] = useState<BargainOffer[]>([]);
+  const [counterInput, setCounterInput] = useState<Record<string, number>>({});
+  const [counterNote, setCounterNote] = useState<Record<string, string>>({});
+  const [showCounterRow, setShowCounterRow] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
@@ -55,9 +65,10 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
   const fetchAccountData = async () => {
     try {
       setIsLoading(true);
-      const [summaryRes, productsRes] = await Promise.all([
+      const [summaryRes, productsRes, bargainRes] = await Promise.all([
         api.getAccountSummary(),
-        api.getProducts({ collegeApprovedOnly: false })
+        api.getProducts({ collegeApprovedOnly: false }),
+        api.getBargainOffers()
       ]);
 
       if (summaryRes.success) {
@@ -66,14 +77,66 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
       }
 
       if (productsRes.success && user) {
-        // Find products listed by this user
         const mine = productsRes.products.filter(p => p.sellerId === user.id);
         setSellerProducts(mine);
+      }
+
+      if (bargainRes.success) {
+        setIncomingOffers(bargainRes.incoming);
+        setOutgoingOffers(bargainRes.outgoing);
       }
     } catch (err) {
       console.error('Failed to load account data:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSellerRespond = async (
+    offerId: string,
+    action: 'ACCEPT' | 'REJECT' | 'COUNTER',
+    counterPrice?: number,
+    sellerMessage?: string
+  ) => {
+    try {
+      const res = await api.respondToBargainOffer({
+        offerId,
+        action,
+        counterPrice,
+        sellerMessage
+      });
+      if (res.success) {
+        setActionMsg({ text: res.message, type: 'success' });
+        fetchAccountData();
+      } else {
+        setActionMsg({ text: res.error || 'Failed to update offer.', type: 'error' });
+      }
+    } catch (err: any) {
+      setActionMsg({ text: err.message || 'Error updating offer.', type: 'error' });
+    }
+  };
+
+  const handleBuyerAcceptCounter = async (offerId: string) => {
+    try {
+      const res = await api.acceptBargainCounter(offerId);
+      if (res.success) {
+        setActionMsg({ text: res.message, type: 'success' });
+        fetchAccountData();
+      } else {
+        setActionMsg({ text: res.error || 'Failed to accept counter-offer.', type: 'error' });
+      }
+    } catch (err: any) {
+      setActionMsg({ text: err.message || 'Error accepting counter.', type: 'error' });
+    }
+  };
+
+  const handleBuyBargain = async (offer: BargainOffer) => {
+    try {
+      await addToCart(offer.productId, 1, offer.offeredPrice, offer.id);
+      onClose();
+      setIsCartOpen(true);
+    } catch (err: any) {
+      setActionMsg({ text: err.message || 'Failed to add bargain item to cart.', type: 'error' });
     }
   };
 
@@ -193,6 +256,23 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
             {sellerMeetups.length > 0 && (
               <span className="bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
                 {sellerMeetups.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('bargains')}
+            className={`pb-3 px-2 text-xs font-bold transition-all flex items-center gap-2 border-b-2 ${
+              activeTab === 'bargains'
+                ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400'
+                : 'border-transparent text-ink-secondary hover:text-ink-primary dark:hover:text-white'
+            }`}
+          >
+            <Handshake className="w-4 h-4" />
+            🤝 Bargains &amp; Negotiations
+            {(incomingOffers.length + outgoingOffers.length) > 0 && (
+              <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+                {incomingOffers.length + outgoingOffers.length}
               </span>
             )}
           </button>
@@ -600,6 +680,366 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
                             )}
                           </div>
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: BARGAINS & PRICE NEGOTIATIONS VIEW */}
+          {activeTab === 'bargains' && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Overview Banner */}
+              <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/60 dark:bg-emerald-950/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                    <Handshake className="w-3.5 h-3.5" />
+                    Campus Peer-to-Peer Price Negotiation
+                  </span>
+                  <h4 className="font-heading font-extrabold text-sm text-ink-primary dark:text-white mt-0.5">
+                    Active Bargains, Incoming Offers &amp; Counter-Deals
+                  </h4>
+                  <p className="text-xs text-ink-secondary dark:text-gray-400 mt-0.5">
+                    Bargain directly with students. Once an offer is accepted by both parties, buy at the agreed discounted price.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <div className="px-3 py-1.5 rounded-lg bg-white dark:bg-surface-dark-card border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-800 dark:text-emerald-300 shadow-2xs">
+                    {incomingOffers.length} Incoming
+                  </div>
+                  <div className="px-3 py-1.5 rounded-lg bg-white dark:bg-surface-dark-card border border-blue-200 dark:border-blue-800 text-xs font-bold text-blue-700 dark:text-blue-300 shadow-2xs">
+                    {outgoingOffers.length} Outgoing
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 1: Incoming Offers on Your Listings */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-heading font-bold text-ink-secondary dark:text-gray-400 uppercase tracking-wider block">
+                    Incoming Buyer Offers on Your Items ({incomingOffers.length})
+                  </span>
+                  <span className="text-[10px] text-ink-secondary dark:text-gray-400">
+                    Offers made by campus peers for your listings
+                  </span>
+                </div>
+
+                {incomingOffers.length === 0 ? (
+                  <div className="p-6 text-center border border-dashed border-surface-border dark:border-surface-dark-border rounded-xl">
+                    <Handshake className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-1.5" />
+                    <p className="text-xs font-semibold text-ink-primary dark:text-white">
+                      No incoming offers on your listed items currently
+                    </p>
+                    <p className="text-[11px] text-ink-secondary dark:text-gray-400 mt-0.5">
+                      When buyers propose a bargain on your listings, they will appear here with accept and counter options.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {incomingOffers.map(offer => {
+                      const discountPct = Math.round(
+                        ((offer.originalListingPrice - offer.offeredPrice) / offer.originalListingPrice) * 100
+                      );
+                      const isCounterOpen = showCounterRow[offer.id] || false;
+                      const inputPrice = counterInput[offer.id] ?? Math.round((offer.originalListingPrice + offer.offeredPrice) / 2);
+                      const inputMsg = counterNote[offer.id] ?? '';
+
+                      return (
+                        <div
+                          key={offer.id}
+                          className="p-4 rounded-xl border border-surface-border dark:border-surface-dark-border bg-surface dark:bg-surface-dark-card shadow-xs space-y-3"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              {offer.productImage && (
+                                <img
+                                  src={offer.productImage}
+                                  alt={offer.productTitle}
+                                  className="w-12 h-12 rounded-lg object-cover border border-surface-border dark:border-surface-dark-border shrink-0"
+                                />
+                              )}
+                              <div>
+                                <h5 className="font-heading font-bold text-xs text-ink-primary dark:text-white">
+                                  {offer.productTitle}
+                                </h5>
+                                <p className="text-[11px] text-ink-secondary dark:text-gray-400 mt-0.5">
+                                  Offered by: <strong>{offer.buyerName}</strong> ({offer.buyerEmail})
+                                </p>
+                              </div>
+                            </div>
+
+                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                              offer.status === 'ACCEPTED'
+                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300'
+                                : offer.status === 'COUNTERED'
+                                ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300'
+                                : offer.status === 'REJECTED'
+                                ? 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-300'
+                                : 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300'
+                            }`}>
+                              {offer.status}
+                            </span>
+                          </div>
+
+                          {/* Price Comparison */}
+                          <div className="p-2.5 rounded-lg bg-surface-subtle dark:bg-surface-dark-page border border-surface-border dark:border-surface-dark-border flex flex-wrap items-center justify-between gap-2 text-xs">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-[11px] text-ink-secondary dark:text-gray-400">Buyer Offers:</span>
+                              <span className="font-heading font-extrabold text-sm text-emerald-600 dark:text-emerald-400">
+                                ₹{offer.offeredPrice.toLocaleString('en-IN')}
+                              </span>
+                              <span className="text-[11px] line-through text-ink-secondary">
+                                ₹{offer.originalListingPrice.toLocaleString('en-IN')}
+                              </span>
+                              <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950 px-1.5 py-0.2 rounded">
+                                {discountPct}% below listing
+                              </span>
+                            </div>
+
+                            {offer.aiDealFeedback && (
+                              <span className="text-[10px] text-brand dark:text-emerald-300 flex items-center gap-1 font-medium">
+                                <Sparkles className="w-3 h-3 shrink-0" />
+                                {offer.aiDealFeedback}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Buyer Note */}
+                          {offer.buyerMessage && (
+                            <p className="text-xs text-ink-secondary dark:text-gray-300 italic bg-white/60 dark:bg-black/30 p-2 rounded-md border border-gray-100 dark:border-gray-800">
+                              "{offer.buyerMessage}"
+                            </p>
+                          )}
+
+                          {/* Seller Action Buttons */}
+                          {offer.status === 'PENDING' && (
+                            <div className="space-y-2 pt-1 border-t border-surface-border dark:border-surface-dark-border">
+                              <div className="flex flex-wrap gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleSellerRespond(offer.id, 'ACCEPT')}
+                                  className="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition-colors flex items-center gap-1 shadow-xs"
+                                >
+                                  <Check className="w-3.5 h-3.5" />
+                                  Accept Deal at ₹{offer.offeredPrice}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setShowCounterRow(prev => ({ ...prev, [offer.id]: !prev[offer.id] }))
+                                  }
+                                  className="py-1.5 px-3 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 font-bold text-xs rounded-lg transition-colors flex items-center gap-1"
+                                >
+                                  <TrendingUp className="w-3.5 h-3.5" />
+                                  {isCounterOpen ? 'Cancel Counter' : 'Counter-Offer'}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleSellerRespond(offer.id, 'REJECT')}
+                                  className="py-1.5 px-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs rounded-lg transition-colors ml-auto"
+                                >
+                                  Decline
+                                </button>
+                              </div>
+
+                              {/* Inline Counter Proposal Drawer */}
+                              {isCounterOpen && (
+                                <div className="p-3 rounded-lg bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 space-y-2 animate-fade-in">
+                                  <div className="flex items-center gap-3">
+                                    <label className="text-xs font-bold text-amber-900 dark:text-amber-200 shrink-0">
+                                      Your Counter Price (₹):
+                                    </label>
+                                    <input
+                                      type="number"
+                                      min={offer.offeredPrice + 1}
+                                      max={offer.originalListingPrice - 1}
+                                      value={inputPrice}
+                                      onChange={e =>
+                                        setCounterInput(prev => ({
+                                          ...prev,
+                                          [offer.id]: Number(e.target.value)
+                                        }))
+                                      }
+                                      className="w-28 px-2 py-1 bg-white dark:bg-slate-900 border border-amber-300 rounded font-bold text-xs"
+                                    />
+                                    <span className="text-[11px] text-amber-700 dark:text-amber-300">
+                                      Suggested midpoint: ₹{Math.round((offer.originalListingPrice + offer.offeredPrice) / 2)}
+                                    </span>
+                                  </div>
+                                  <input
+                                    type="text"
+                                    placeholder="Optional note (e.g. Can meet at Canteen right now, will include bill)..."
+                                    value={inputMsg}
+                                    onChange={e =>
+                                      setCounterNote(prev => ({
+                                        ...prev,
+                                        [offer.id]: e.target.value
+                                      }))
+                                    }
+                                    className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-amber-300 rounded text-xs"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleSellerRespond(offer.id, 'COUNTER', inputPrice, inputMsg)
+                                    }
+                                    className="py-1.5 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-md shadow-xs transition-colors"
+                                  >
+                                    Send Counter-Offer of ₹{inputPrice} →
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {offer.status === 'COUNTERED' && (
+                            <div className="text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-lg border border-amber-200 dark:border-amber-800">
+                              <span>You proposed a counter-price of <strong>₹{offer.counterPrice?.toLocaleString('en-IN')}</strong>. Waiting for {offer.buyerName} to accept.</span>
+                            </div>
+                          )}
+
+                          {offer.status === 'ACCEPTED' && (
+                            <div className="text-xs text-emerald-800 dark:text-emerald-200 bg-emerald-50 dark:bg-emerald-950/40 p-2 rounded-lg border border-emerald-200 dark:border-emerald-800 flex items-center justify-between">
+                              <span>Deal accepted at <strong>₹{offer.offeredPrice.toLocaleString('en-IN')}</strong>. Handover coordination ready.</span>
+                              <span className="text-[10px] font-bold text-emerald-700 uppercase">Confirmed</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Section 2: Outgoing Offers You Made */}
+              <div className="space-y-3 pt-4 border-t border-surface-border dark:border-surface-dark-border">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-heading font-bold text-ink-secondary dark:text-gray-400 uppercase tracking-wider block">
+                    Your Bargain Offers to Sellers ({outgoingOffers.length})
+                  </span>
+                  <span className="text-[10px] text-ink-secondary dark:text-gray-400">
+                    Offers you proposed to fellow campus students
+                  </span>
+                </div>
+
+                {outgoingOffers.length === 0 ? (
+                  <div className="p-6 text-center border border-dashed border-surface-border dark:border-surface-dark-border rounded-xl">
+                    <ShoppingBag className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-1.5" />
+                    <p className="text-xs font-semibold text-ink-primary dark:text-white">
+                      You haven't proposed any bargain offers yet
+                    </p>
+                    <p className="text-[11px] text-ink-secondary dark:text-gray-400 mt-0.5">
+                      Click "Bargain / Make Offer" on any product to negotiate fair prices with student sellers!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {outgoingOffers.map(offer => (
+                      <div
+                        key={offer.id}
+                        className="p-4 rounded-xl border border-surface-border dark:border-surface-dark-border bg-surface dark:bg-surface-dark-card shadow-xs space-y-3"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            {offer.productImage && (
+                              <img
+                                src={offer.productImage}
+                                alt={offer.productTitle}
+                                className="w-12 h-12 rounded-lg object-cover border border-surface-border dark:border-surface-dark-border shrink-0"
+                              />
+                            )}
+                            <div>
+                              <h5 className="font-heading font-bold text-xs text-ink-primary dark:text-white">
+                                {offer.productTitle}
+                              </h5>
+                              <p className="text-[11px] text-ink-secondary dark:text-gray-400 mt-0.5">
+                                Seller: <strong>{offer.sellerName}</strong>
+                              </p>
+                            </div>
+                          </div>
+
+                          <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                            offer.status === 'ACCEPTED'
+                              ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300'
+                              : offer.status === 'COUNTERED'
+                              ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300'
+                              : 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300'
+                          }`}>
+                            {offer.status}
+                          </span>
+                        </div>
+
+                        {/* Price Details */}
+                        <div className="p-2.5 rounded-lg bg-surface-subtle dark:bg-surface-dark-page border border-surface-border dark:border-surface-dark-border flex flex-wrap items-center justify-between gap-2 text-xs">
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-[11px] text-ink-secondary dark:text-gray-400">Your Offer:</span>
+                            <span className="font-heading font-extrabold text-sm text-emerald-600 dark:text-emerald-400">
+                              ₹{offer.offeredPrice.toLocaleString('en-IN')}
+                            </span>
+                            <span className="text-[11px] line-through text-ink-secondary">
+                              ₹{offer.originalListingPrice.toLocaleString('en-IN')}
+                            </span>
+                          </div>
+
+                          {offer.status === 'PENDING' && (
+                            <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium">
+                              Waiting for {offer.sellerName} to review
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Counter-Offer Action */}
+                        {offer.status === 'COUNTERED' && offer.counterPrice && (
+                          <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 space-y-2">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-bold text-amber-900 dark:text-amber-200">
+                                Seller Counter-Offer: ₹{offer.counterPrice.toLocaleString('en-IN')}
+                              </span>
+                              <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
+                                Save ₹{(offer.originalListingPrice - offer.counterPrice).toLocaleString('en-IN')}
+                              </span>
+                            </div>
+                            {offer.sellerMessage && (
+                              <p className="text-[11px] text-amber-800 dark:text-amber-300 italic">
+                                "{offer.sellerMessage}"
+                              </p>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleBuyerAcceptCounter(offer.id)}
+                              className="w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                              Accept Counter-Offer of ₹{offer.counterPrice.toLocaleString('en-IN')}
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Accepted Deal Action */}
+                        {offer.status === 'ACCEPTED' && (
+                          <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-3">
+                            <div>
+                              <p className="font-bold text-xs text-emerald-900 dark:text-emerald-200">
+                                🎉 Offer Accepted at ₹{offer.offeredPrice.toLocaleString('en-IN')}!
+                              </p>
+                              <p className="text-[10px] text-emerald-700 dark:text-emerald-400">
+                                Bargain price locked in. Add to cart to proceed with on-campus pickup.
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleBuyBargain(offer)}
+                              className="py-2 px-3 bg-brand hover:bg-brand-hover text-white font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 shadow-md active:scale-95 shrink-0"
+                            >
+                              <ShoppingBag className="w-3.5 h-3.5" />
+                              Buy at ₹{offer.offeredPrice} →
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

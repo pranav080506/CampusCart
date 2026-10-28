@@ -12,7 +12,9 @@ import {
   MeetupSession,
   MeetupHistoryEntry,
   MeetupStatus,
-  ChatMessage
+  ChatMessage,
+  BargainOffer,
+  BargainStatus
 } from '../types';
 import { seedColleges, seedCategories, seedUsers, seedProducts, seedAuditLogs } from './seedData';
 
@@ -76,6 +78,50 @@ class DatabaseStore {
   private wishlist: Map<string, Set<string>> = new Map(); // userId -> Set of productIds
   private cart: Map<string, CartItem[]> = new Map(); // userId -> CartItem[]
   private campusHubs: CampusMeetupHub[] = [...seedCampusHubs];
+  private bargainOffers: BargainOffer[] = [
+    {
+      id: 'off-seed-1',
+      productId: 'prod-1',
+      productTitle: 'Omega Deluxe Mini Drafter Set with Protractor Head',
+      productImage: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80',
+      originalListingPrice: 650,
+      offeredPrice: 550,
+      buyerId: 'usr-student-1',
+      buyerName: 'Rohan Sharma',
+      buyerEmail: 'rohan.sharma@glbitm.ac.in',
+      sellerId: 'usr-student-2',
+      sellerName: 'Ananya Iyer',
+      sellerEmail: 'ananya.iyer@glbitm.ac.in',
+      status: 'PENDING',
+      buyerMessage: 'Hi Ananya! I have Engineering Graphics workshop tomorrow. Can pay ₹550 cash or UPI right away at B.Tech canteen!',
+      aiAcceptanceProbability: 82,
+      aiDealFeedback: 'Fair Offer (15% discount). High acceptance probability on campus.',
+      createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+      updatedAt: new Date(Date.now() - 3600000 * 5).toISOString()
+    },
+    {
+      id: 'off-seed-2',
+      productId: 'prod-2',
+      productTitle: 'Casio FX-991CW ClassWiz Non-Programmable Scientific Calculator',
+      productImage: 'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?w=800&auto=format&fit=crop&q=80',
+      originalListingPrice: 1150,
+      offeredPrice: 950,
+      buyerId: 'usr-student-3',
+      buyerName: 'Kabir Verma',
+      buyerEmail: 'kabir.verma@glbitm.ac.in',
+      sellerId: 'usr-student-1',
+      sellerName: 'Rohan Sharma',
+      sellerEmail: 'rohan.sharma@glbitm.ac.in',
+      status: 'COUNTERED',
+      buyerMessage: 'Would you do ₹950? Need it for semester exams.',
+      counterPrice: 1050,
+      sellerMessage: 'How about ₹1,050? The calculator is practically new with bill & warranty.',
+      aiAcceptanceProbability: 70,
+      aiDealFeedback: 'Counter-offer active. Close to seller target margin.',
+      createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+      updatedAt: new Date(Date.now() - 3600000 * 3).toISOString()
+    }
+  ];
   private meetupSessions: MeetupSession[] = [
     {
       id: 'meet-seed-1',
@@ -223,6 +269,10 @@ class DatabaseStore {
 
   public getUsers(): User[] {
     return this.users;
+  }
+
+  public getUserById(id: string): User | undefined {
+    return this.users.find(u => u.id === id);
   }
 
   public findUserByEmail(email: string): User | undefined {
@@ -536,22 +586,34 @@ class DatabaseStore {
     const items = this.cart.get(userId) || [];
     return items.map(item => ({
       ...item,
+      agreedPrice: item.agreedPrice,
+      bargainOfferId: item.bargainOfferId,
       product: this.getProductById(item.productId)
     })).filter(item => item.product && item.product.status === 'APPROVED');
   }
 
-  public addToCart(userId: string, productId: string, quantity: number = 1): CartItem[] {
+  public addToCart(
+    userId: string,
+    productId: string,
+    quantity: number = 1,
+    agreedPrice?: number,
+    bargainOfferId?: string
+  ): CartItem[] {
     let items = this.cart.get(userId) || [];
     const existing = items.find(i => i.productId === productId);
 
     if (existing) {
       existing.quantity += quantity;
+      if (agreedPrice !== undefined) existing.agreedPrice = agreedPrice;
+      if (bargainOfferId) existing.bargainOfferId = bargainOfferId;
     } else {
       items.push({
         id: `cart-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
         userId,
         productId,
-        quantity
+        quantity,
+        agreedPrice,
+        bargainOfferId
       });
     }
 
@@ -804,6 +866,178 @@ class DatabaseStore {
     session.messages.push(newMsg);
     session.updatedAt = new Date().toISOString();
     return newMsg;
+  }
+
+  // --- Bargain & Negotiation Operations ---
+  public getBargainOffers(userId?: string): { incoming: BargainOffer[]; outgoing: BargainOffer[] } {
+    const uid = userId || this.currentUserId;
+    const incoming = this.bargainOffers
+      .filter(o => o.sellerId === uid)
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    const outgoing = this.bargainOffers
+      .filter(o => o.buyerId === uid)
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    return { incoming, outgoing };
+  }
+
+  public getBargainOfferById(offerId: string): BargainOffer | undefined {
+    return this.bargainOffers.find(o => o.id === offerId);
+  }
+
+  public getBargainOfferByProductAndBuyer(productId: string, buyerId: string): BargainOffer | undefined {
+    return this.bargainOffers.find(
+      o => o.productId === productId && o.buyerId === buyerId && o.status !== 'REJECTED' && o.status !== 'EXPIRED'
+    );
+  }
+
+  public createBargainOffer(params: {
+    productId: string;
+    buyerId?: string;
+    offeredPrice: number;
+    buyerMessage?: string;
+    allowAutoCounter?: boolean;
+  }): BargainOffer {
+    const product = this.getProductById(params.productId);
+    if (!product) {
+      throw new Error('Product not found.');
+    }
+
+    const buyer = params.buyerId ? this.getUserById(params.buyerId) : this.getCurrentUser();
+    if (!buyer) {
+      throw new Error('Buyer authentication required.');
+    }
+
+    if (buyer.id === product.sellerId) {
+      throw new Error('You cannot bargain on your own listed product.');
+    }
+
+    if (params.offeredPrice <= 0 || params.offeredPrice >= product.price) {
+      throw new Error(`Offered price must be greater than 0 and less than listed price of ₹${product.price}.`);
+    }
+
+    const discountPercent = Math.round(((product.price - params.offeredPrice) / product.price) * 100);
+    let aiAcceptanceProbability = 85;
+    let aiDealFeedback = 'Reasonable student offer. High likelihood of seller acceptance.';
+
+    if (discountPercent <= 10) {
+      aiAcceptanceProbability = 92;
+      aiDealFeedback = 'Standard campus discount (<=10%). Very high likelihood of immediate seller acceptance!';
+    } else if (discountPercent <= 20) {
+      aiAcceptanceProbability = 78;
+      aiDealFeedback = 'Moderate discount (11-20%). Most campus peers find this a win-win.';
+    } else if (discountPercent <= 35) {
+      aiAcceptanceProbability = 55;
+      aiDealFeedback = 'Aggressive discount (21-35%). Seller may counter or request quick pickup.';
+    } else {
+      aiAcceptanceProbability = 28;
+      aiDealFeedback = 'Heavy discount (>35%). Consider offering slightly more to prevent rejection.';
+    }
+
+    const seller = this.getUserById(product.sellerId);
+
+    // Cancel existing pending/countered offer for this buyer & product
+    const existing = this.bargainOffers.find(
+      o => o.productId === product.id && o.buyerId === buyer.id && (o.status === 'PENDING' || o.status === 'COUNTERED')
+    );
+    if (existing) {
+      existing.status = 'EXPIRED';
+    }
+
+    const newOffer: BargainOffer = {
+      id: `off-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      productId: product.id,
+      productTitle: product.title,
+      productImage: product.images?.[0],
+      originalListingPrice: product.price,
+      offeredPrice: params.offeredPrice,
+      buyerId: buyer.id,
+      buyerName: buyer.fullName,
+      buyerEmail: buyer.email,
+      sellerId: product.sellerId,
+      sellerName: seller?.fullName || product.sellerName || 'Campus Seller',
+      sellerEmail: seller?.email || 'seller@glbitm.ac.in',
+      status: 'PENDING',
+      buyerMessage: params.buyerMessage || 'Interested in buying! Would you accept this price?',
+      aiAcceptanceProbability,
+      aiDealFeedback,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    // Auto-seller interaction for instant live demo experience
+    if (params.allowAutoCounter || product.sellerId !== this.currentUserId) {
+      if (discountPercent <= 12) {
+        newOffer.status = 'ACCEPTED';
+        newOffer.sellerMessage = `Deal agreed at ₹${params.offeredPrice}! You can pick it up at ${
+          product.preferredMeetupHubs?.[0] || 'B.Tech Canteen'
+        }.`;
+      } else if (discountPercent <= 30) {
+        const counter = Math.round((product.price + params.offeredPrice) / 2);
+        newOffer.status = 'COUNTERED';
+        newOffer.counterPrice = counter;
+        newOffer.sellerMessage = `Hey ${buyer.fullName.split(' ')[0]}! Can we meet in the middle at ₹${counter}? I can hand it over today.`;
+      }
+    }
+
+    this.bargainOffers.unshift(newOffer);
+    return newOffer;
+  }
+
+  public respondToBargainOffer(params: {
+    offerId: string;
+    responderId?: string;
+    action: 'ACCEPT' | 'REJECT' | 'COUNTER';
+    counterPrice?: number;
+    sellerMessage?: string;
+  }): BargainOffer {
+    const offer = this.getBargainOfferById(params.offerId);
+    if (!offer) {
+      throw new Error('Bargain offer not found.');
+    }
+
+    const responder = params.responderId ? this.getUserById(params.responderId) : this.getCurrentUser();
+    if (responder && responder.id !== offer.sellerId && responder.role !== 'SUPER_ADMIN') {
+      throw new Error('Only the seller of this product can respond to this offer.');
+    }
+
+    if (params.action === 'ACCEPT') {
+      offer.status = 'ACCEPTED';
+      offer.sellerMessage = params.sellerMessage || `Accepted! Deal finalized at ₹${offer.offeredPrice}.`;
+    } else if (params.action === 'REJECT') {
+      offer.status = 'REJECTED';
+      offer.sellerMessage = params.sellerMessage || 'Thank you for the offer, but I cannot sell at this price.';
+    } else if (params.action === 'COUNTER') {
+      if (!params.counterPrice || params.counterPrice <= 0 || params.counterPrice >= offer.originalListingPrice) {
+        throw new Error('Counter-offer price must be between buyer offer and listed price.');
+      }
+      offer.status = 'COUNTERED';
+      offer.counterPrice = params.counterPrice;
+      offer.sellerMessage = params.sellerMessage || `How about ₹${params.counterPrice}?`;
+    }
+
+    offer.updatedAt = new Date().toISOString();
+    return offer;
+  }
+
+  public acceptCounterOffer(offerId: string, buyerId?: string): BargainOffer {
+    const offer = this.getBargainOfferById(offerId);
+    if (!offer) {
+      throw new Error('Bargain offer not found.');
+    }
+
+    if (offer.status !== 'COUNTERED' || !offer.counterPrice) {
+      throw new Error('No active counter-offer to accept.');
+    }
+
+    const buyer = buyerId ? this.getUserById(buyerId) : this.getCurrentUser();
+    if (buyer && buyer.id !== offer.buyerId && buyer.role !== 'SUPER_ADMIN') {
+      throw new Error('Only the original buyer can accept this counter-offer.');
+    }
+
+    offer.offeredPrice = offer.counterPrice;
+    offer.status = 'ACCEPTED';
+    offer.updatedAt = new Date().toISOString();
+    return offer;
   }
 }
 

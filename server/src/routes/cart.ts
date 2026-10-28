@@ -3,12 +3,19 @@ import { db } from '../db/database';
 
 const router = Router();
 
+// Helper to calculate subtotal with agreed bargain prices respected
+const computeSubtotal = (items: any[]) =>
+  items.reduce((sum, item) => {
+    const unitPrice = item.agreedPrice !== undefined ? item.agreedPrice : (item.product?.price || 0);
+    return sum + (unitPrice * item.quantity);
+  }, 0);
+
 // GET /api/cart - User cart with product details
 router.get('/', (_req: Request, res: Response) => {
   try {
     const user = db.getCurrentUser();
     const items = db.getCart(user.id);
-    const subtotal = items.reduce((sum, item) => sum + ((item.product?.price || 0) * item.quantity), 0);
+    const subtotal = computeSubtotal(items);
 
     res.json({
       success: true,
@@ -21,21 +28,21 @@ router.get('/', (_req: Request, res: Response) => {
   }
 });
 
-// POST /api/cart/add - Add item to cart
+// POST /api/cart/add - Add item to cart (with optional agreed bargain price)
 router.post('/add', (req: Request, res: Response) => {
   try {
-    const { productId, quantity } = req.body;
+    const { productId, quantity, agreedPrice, bargainOfferId } = req.body;
     if (!productId) {
       return res.status(400).json({ success: false, error: 'Product ID is required.' });
     }
 
     const user = db.getCurrentUser();
-    const items = db.addToCart(user.id, productId, quantity || 1);
-    const subtotal = items.reduce((sum, item) => sum + ((item.product?.price || 0) * item.quantity), 0);
+    const items = db.addToCart(user.id, productId, quantity || 1, agreedPrice, bargainOfferId);
+    const subtotal = computeSubtotal(items);
 
     res.json({
       success: true,
-      message: 'Item added to cart',
+      message: agreedPrice ? `Item added with accepted bargain price of ₹${agreedPrice}` : 'Item added to cart',
       items,
       itemCount: items.reduce((cnt, item) => cnt + item.quantity, 0),
       subtotal
@@ -51,7 +58,7 @@ router.put('/update', (req: Request, res: Response) => {
     const { cartItemId, quantity } = req.body;
     const user = db.getCurrentUser();
     const items = db.updateCartItem(user.id, cartItemId, Number(quantity));
-    const subtotal = items.reduce((sum, item) => sum + ((item.product?.price || 0) * item.quantity), 0);
+    const subtotal = computeSubtotal(items);
 
     res.json({
       success: true,
@@ -70,7 +77,7 @@ router.delete('/:cartItemId', (req: Request, res: Response) => {
     const { cartItemId } = req.params;
     const user = db.getCurrentUser();
     const items = db.updateCartItem(user.id, cartItemId, 0);
-    const subtotal = items.reduce((sum, item) => sum + ((item.product?.price || 0) * item.quantity), 0);
+    const subtotal = computeSubtotal(items);
 
     res.json({
       success: true,

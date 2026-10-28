@@ -1,4 +1,17 @@
-import { Product, Category, College, User, CartItem, ModerationAuditLog, AIVerificationResult, CampusMeetupHub, MeetupSession, ChatMessage } from '../types';
+import {
+  Product,
+  Category,
+  College,
+  User,
+  CartItem,
+  ModerationAuditLog,
+  AIVerificationResult,
+  CampusMeetupHub,
+  MeetupSession,
+  ChatMessage,
+  BargainOffer,
+  BargainStatus
+} from '../types';
 
 const getBaseUrl = (): string => {
   const envUrl = import.meta.env.VITE_API_URL;
@@ -162,11 +175,16 @@ export const api = {
     return res.json();
   },
 
-  async addToCart(productId: string, quantity: number = 1): Promise<{ success: boolean; items: CartItem[]; itemCount: number; subtotal: number }> {
+  async addToCart(
+    productId: string,
+    quantity: number = 1,
+    agreedPrice?: number,
+    bargainOfferId?: string
+  ): Promise<{ success: boolean; message?: string; items: CartItem[]; itemCount: number; subtotal: number }> {
     const res = await fetch(`${BASE_URL}/cart/add`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId, quantity })
+      body: JSON.stringify({ productId, quantity, agreedPrice, bargainOfferId })
     });
     return res.json();
   },
@@ -385,6 +403,94 @@ export const api = {
 
   async getSupabaseStatus(): Promise<{ success: boolean; data?: any; error?: string }> {
     const res = await fetch(`${BASE_URL}/supabase/status`);
+    return res.json();
+  },
+
+  // Bargain & Price Negotiations
+  async getBargainOffers(): Promise<{
+    success: boolean;
+    incoming: BargainOffer[];
+    outgoing: BargainOffer[];
+    totalActiveOffers: number;
+    error?: string;
+  }> {
+    const res = await fetch(`${BASE_URL}/bargain/offers`);
+    return res.json();
+  },
+
+  async getBargainOfferForProduct(productId: string): Promise<{
+    success: boolean;
+    hasActiveOffer: boolean;
+    offer: BargainOffer | null;
+    error?: string;
+  }> {
+    const res = await fetch(`${BASE_URL}/bargain/product/${productId}`);
+    return res.json();
+  },
+
+  async makeBargainOffer(data: {
+    productId: string;
+    offeredPrice: number;
+    message?: string;
+    allowAutoCounter?: boolean;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    offer?: BargainOffer;
+    error?: string;
+  }> {
+    const res = await fetch(`${BASE_URL}/bargain/make-offer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async respondToBargainOffer(data: {
+    offerId: string;
+    action: 'ACCEPT' | 'REJECT' | 'COUNTER';
+    counterPrice?: number;
+    sellerMessage?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    offer?: BargainOffer;
+    error?: string;
+  }> {
+    const res = await fetch(`${BASE_URL}/bargain/respond`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async acceptBargainCounter(offerId: string): Promise<{
+    success: boolean;
+    message: string;
+    offer?: BargainOffer;
+    error?: string;
+  }> {
+    const res = await fetch(`${BASE_URL}/bargain/accept-counter`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ offerId })
+    });
+    return res.json();
+  },
+
+  async buyAcceptedBargain(offerId: string): Promise<{
+    success: boolean;
+    message: string;
+    cart?: { items: CartItem[]; itemCount: number; subtotal: number };
+    error?: string;
+  }> {
+    const res = await fetch(`${BASE_URL}/bargain/buy-accepted`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ offerId })
+    });
     return res.json();
   }
 };

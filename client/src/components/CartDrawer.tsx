@@ -198,9 +198,25 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenMeetupCoordination
                         <h4 className="font-heading font-bold text-xs text-ink-primary dark:text-white truncate">
                           {item.product?.title}
                         </h4>
-                        <span className="text-xs font-bold text-ink-primary dark:text-white">
-                          ₹{(item.product?.price || 0).toLocaleString('en-IN')}
-                        </span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {item.agreedPrice !== undefined ? (
+                            <>
+                              <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
+                                ₹{item.agreedPrice.toLocaleString('en-IN')}
+                              </span>
+                              <span className="text-[10px] text-ink-secondary line-through">
+                                ₹{(item.product?.price || 0).toLocaleString('en-IN')}
+                              </span>
+                              <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-700 flex items-center gap-0.5">
+                                🤝 Bargain Deal
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-xs font-bold text-ink-primary dark:text-white">
+                              ₹{(item.product?.price || 0).toLocaleString('en-IN')}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <div className="flex items-center justify-between mt-2">

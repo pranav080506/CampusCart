@@ -11,9 +11,11 @@ import {
   Clock,
   User,
   ArrowRight,
-  MessageSquare
+  MessageSquare,
+  Handshake
 } from 'lucide-react';
 import { VerificationExplainablePanel } from './VerificationExplainablePanel';
+import { BargainOfferModal } from './BargainOfferModal';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 
@@ -36,6 +38,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const { isInWishlist, toggleWishlist } = useWishlist();
   const [selectedImgIndex, setSelectedImgIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [isBargainOpen, setIsBargainOpen] = useState(false);
 
   const isLiked = isInWishlist(product.id);
   const activeImage = product.images[selectedImgIndex] || product.images[0];
@@ -225,20 +228,31 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   </button>
                 </div>
 
-                {/* Direct In-App Chat & Contact Trigger */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    if (onOpenMeetupCoordination) {
-                      onOpenMeetupCoordination();
-                    }
-                  }}
-                  className="w-full mt-2.5 py-2.5 rounded-lg border border-brand text-brand dark:text-emerald-300 hover:bg-brand-light dark:hover:bg-emerald-950/60 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  Chat & Contact Seller to Decide Handover
-                </button>
+                {/* Bargain & Chat Actions */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsBargainOpen(true)}
+                    className="py-2.5 px-4 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700/60 text-emerald-800 dark:text-emerald-200 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs active:scale-[0.99]"
+                  >
+                    <Handshake className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>🤝 Bargain / Make Offer</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      if (onOpenMeetupCoordination) {
+                        onOpenMeetupCoordination();
+                      }
+                    }}
+                    className="py-2.5 px-4 rounded-lg border border-brand text-brand dark:text-emerald-300 hover:bg-brand-light dark:hover:bg-emerald-950/60 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Chat With Seller</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -249,6 +263,13 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Bargain & Price Negotiation Modal */}
+      <BargainOfferModal
+        product={product}
+        isOpen={isBargainOpen}
+        onClose={() => setIsBargainOpen(false)}
+      />
     </div>
   );
 };

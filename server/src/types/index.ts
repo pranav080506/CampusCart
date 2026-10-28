@@ -193,10 +193,37 @@ export interface RestrictedPolicy {
   isActive: boolean;
 }
 
+export type BargainStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COUNTERED' | 'EXPIRED';
+
+export interface BargainOffer {
+  id: string;
+  productId: string;
+  productTitle: string;
+  productImage?: string;
+  originalListingPrice: number;
+  offeredPrice: number;
+  buyerId: string;
+  buyerName: string;
+  buyerEmail: string;
+  sellerId: string;
+  sellerName: string;
+  sellerEmail: string;
+  status: BargainStatus;
+  buyerMessage?: string;
+  counterPrice?: number;
+  sellerMessage?: string;
+  aiAcceptanceProbability?: number;
+  aiDealFeedback?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface CartItem {
   id: string;
   userId: string;
   productId: string;
   quantity: number;
   product?: Product;
+  agreedPrice?: number;
+  bargainOfferId?: string;
 }

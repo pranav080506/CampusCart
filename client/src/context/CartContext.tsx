@@ -8,7 +8,7 @@ interface CartContextType {
   cartSubtotal: number;
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
-  addToCart: (productId: string, quantity?: number) => Promise<void>;
+  addToCart: (productId: string, quantity?: number, agreedPrice?: number, bargainOfferId?: string) => Promise<void>;
   updateCartItem: (cartItemId: string, quantity: number) => Promise<void>;
   removeFromCart: (cartItemId: string) => Promise<void>;
   checkout: (payload?: {
@@ -47,10 +47,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refreshCart();
   }, []);
 
-  const addToCart = async (productId: string, quantity: number = 1) => {
+  const addToCart = async (
+    productId: string,
+    quantity: number = 1,
+    agreedPrice?: number,
+    bargainOfferId?: string
+  ) => {
     try {
       setIsLoading(true);
-      const res = await api.addToCart(productId, quantity);
+      const res = await api.addToCart(productId, quantity, agreedPrice, bargainOfferId);
       if (res.success) {
         setCartItems(res.items);
         setCartCount(res.itemCount);
