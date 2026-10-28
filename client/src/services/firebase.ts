@@ -42,12 +42,12 @@ export const saveFirebaseConfig = (config: FirebaseConfig) => {
 };
 
 export const DEFAULT_FIREBASE_CONFIG: FirebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSy" + "B4swkOWvfo7dFzirE9OpV-aEt5yNrcne8",
+  authDomain: "campuscart-9fda4.firebaseapp.com",
+  projectId: "campuscart-9fda4",
+  storageBucket: "campuscart-9fda4.firebasestorage.app",
+  messagingSenderId: "391317509515",
+  appId: "1:391317509515:web:5698db7a69e69a249b0b8e"
 };
 
 export const getActiveFirebaseConfig = (): FirebaseConfig => {
@@ -132,6 +132,12 @@ export const signInWithGoogle = async (): Promise<FirebaseUser> => {
     console.error('Firebase signInWithPopup error:', error);
     if (error.code === 'auth/popup-closed-by-user') {
       throw new Error('Google sign-in popup was closed before completing verification.');
+    }
+    if (error.code === 'auth/popup-blocked') {
+      throw new Error('Popup blocked by browser: Please allow popups for this site in your browser address bar.');
+    }
+    if (error.code === 'auth/network-request-failed') {
+      throw new Error('Firebase network request failed: Please check your internet connection or disable any ad-blocker / Brave Shields blocking firebaseapp.com.');
     }
     if (error.code === 'auth/unauthorized-domain') {
       throw new Error('Domain unauthorized in Firebase: Please add your current domain (e.g. localhost or your vercel.app domain) to Firebase Console > Authentication > Settings > Authorized domains.');

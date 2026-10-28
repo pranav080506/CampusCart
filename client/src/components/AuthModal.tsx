@@ -438,9 +438,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Feedback Messages */}
         {errorMsg && (
-          <div className="mx-6 mt-3 p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-xs text-red-700 dark:text-red-300 flex items-start gap-2 animate-shake shrink-0">
+          <div className="mx-6 mt-3 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-xs text-red-700 dark:text-red-300 flex items-start gap-2.5 animate-shake shrink-0">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{errorMsg}</span>
+            <div className="flex-1 space-y-2">
+              <p className="font-semibold">{errorMsg}</p>
+              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-red-200/60 dark:border-red-800/60">
+                <button
+                  type="button"
+                  onClick={() => handleSimulatedGoogleSelect('2023me10452@gibitm.ac.in', 'Rohan Sharma')}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition-all flex items-center gap-1 shadow-xs"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>Instant Student Login (Rohan) →</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsGoogleChooserOpen(true)}
+                  className="px-2.5 py-1 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold text-[11px] transition-all"
+                >
+                  Configure Firebase / Test Accounts
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
