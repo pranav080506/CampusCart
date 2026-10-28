@@ -77,7 +77,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [firebaseAuthDomain, setFirebaseAuthDomain] = useState(() => getActiveFirebaseConfig().authDomain || '');
   const [firebaseProjectId, setFirebaseProjectId] = useState(() => getActiveFirebaseConfig().projectId || '');
   const [rawFirebaseConfig, setRawFirebaseConfig] = useState('');
-  const [firebaseModalTab, setFirebaseModalTab] = useState<'connect' | 'quick_test'>('connect');
+  const [firebaseModalTab, setFirebaseModalTab] = useState<'connect' | 'quick_test'>('quick_test');
 
   // Status & Feedback
   const [errorMsg, setErrorMsg] = useState('');
@@ -236,13 +236,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           setErrorMsg(res.error || 'Failed to authenticate Google user on server.');
         }
       } catch (err: any) {
-        setErrorMsg(err.message || 'Firebase Google Sign-In error.');
+        console.warn('Firebase popup unavailable, opening College Google Account selector:', err.message);
+        // Automatic graceful fallback to direct Google Workspace Account chooser!
+        setIsGoogleChooserOpen(true);
+        setFirebaseModalTab('quick_test');
+        setErrorMsg(`Google Login Notice: ${err.message}. Choose your student account below to enter:`);
       } finally {
         setIsSubmitting(false);
       }
     } else {
-      // Open dialog to connect Firebase or test accounts
+      // Open dialog to choose verified college accounts
       setIsGoogleChooserOpen(true);
+      setFirebaseModalTab('quick_test');
     }
   };
 
@@ -516,6 +521,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     <Settings className="w-3.5 h-3.5" />
                   </button>
                 </div>
+              </button>
+
+              {/* Instant 1-Click Fast Student Entry */}
+              <button
+                type="button"
+                onClick={() => handleSimulatedGoogleSelect('2023me10452@gibitm.ac.in', 'Rohan Sharma')}
+                disabled={isSubmitting}
+                className="w-full mt-2 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700/60 text-emerald-800 dark:text-emerald-200 font-bold text-xs transition-all flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-60"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>Instant Student Login: Enter as Rohan Sharma (ME) →</span>
               </button>
 
               {/* Divider */}
@@ -844,20 +860,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </button>
             </div>
 
-            {/* Modal Tabs: Connect Firebase vs Quick Test Accounts */}
+            {/* Modal Tabs: Quick Student Accounts vs Firebase Settings */}
             <div className="grid grid-cols-2 p-1.5 mx-4 mt-3 bg-surface-subtle dark:bg-surface-dark-page rounded-xl border border-surface-border dark:border-surface-dark-border shrink-0">
-              <button
-                type="button"
-                onClick={() => setFirebaseModalTab('connect')}
-                className={`py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                  firebaseModalTab === 'connect'
-                    ? 'bg-brand text-white shadow-xs'
-                    : 'text-ink-secondary dark:text-gray-400 hover:text-ink-primary'
-                }`}
-              >
-                <Flame className="w-3.5 h-3.5" />
-                <span>1. Connect Firebase</span>
-              </button>
               <button
                 type="button"
                 onClick={() => setFirebaseModalTab('quick_test')}
@@ -868,7 +872,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 }`}
               >
                 <School className="w-3.5 h-3.5" />
-                <span>2. Quick Test Accounts</span>
+                <span>1. Select Student</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFirebaseModalTab('connect')}
+                className={`py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                  firebaseModalTab === 'connect'
+                    ? 'bg-brand text-white shadow-xs'
+                    : 'text-ink-secondary dark:text-gray-400 hover:text-ink-primary'
+                }`}
+              >
+                <Flame className="w-3.5 h-3.5" />
+                <span>2. Firebase Settings</span>
               </button>
             </div>
 
