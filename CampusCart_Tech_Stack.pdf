@@ -1,0 +1,490 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 3 0 R >>
+endobj
+2 0 obj
+<< /Type /Outlines /Count 0 >>
+endobj
+3 0 obj
+<< /Type /Pages /Kids [8 0 R 10 0 R] /Count 2 >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>
+endobj
+7 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-BoldOblique /Encoding /WinAnsiEncoding >>
+endobj
+8 0 obj
+<< /Type /Page /Parent 3 0 R
+   /MediaBox [0 0 595.28 841.89]
+   /Contents 9 0 R
+   /Resources << /Font << /F1 4 0 R /F2 5 0 R /F3 6 0 R /F4 7 0 R >> >>
+>>
+endobj
+9 0 obj
+<< /Length 10836 >>
+stream
+0.090 0.420 0.300 RG
+1.50 w 45.00 806.89 m 550.28 806.89 l S
+0.090 0.420 0.300 rg
+BT /F2 8.5 Tf 45.00 811.89 Td (CampusCart -- Technical Stack & System Architecture) Tj ET
+0.500 0.500 0.500 rg
+BT /F1 8.5 Tf 420.28 811.89 Td (Confidential / Engineering Spec) Tj ET
+0.850 0.850 0.850 RG
+0.75 w 45.00 35.00 m 550.28 35.00 l S
+0.500 0.500 0.500 rg
+BT /F1 8 Tf 45.00 24.00 Td (CampusCart | G.L. Bajaj Institute of Technology & Management) Tj ET
+0.300 0.300 0.300 rg
+BT /F2 8 Tf 495.28 24.00 Td (Page 1 of 2) Tj ET
+0.940 0.980 0.950 rg
+45.00 681.89 505.28 95.00 re f
+0.090 0.420 0.300 RG
+4.00 w 45.00 681.89 m 49.00 776.89 l S
+0.090 0.420 0.300 rg
+BT /F2 22 Tf 63.00 748.89 Td (CampusCart) Tj ET
+0.300 0.300 0.300 rg
+BT /F1 11 Tf 200.00 750.89 Td (AI-Enabled College Peer-to-Peer Marketplace) Tj ET
+0.100 0.100 0.100 rg
+BT /F2 13 Tf 63.00 728.89 Td (Complete Technology Stack & Enterprise Architecture Document) Tj ET
+0.350 0.350 0.350 rg
+BT /F1 9.5 Tf 63.00 708.89 Td (Target Institution: G.L. Bajaj Institute of Technology & Management \(GLBITM\)) Tj ET
+0.450 0.450 0.450 rg
+BT /F3 8.5 Tf 63.00 694.89 Td (Author: Engineering Core Team  -  Date: October 2026  -  Version: 1.0.0 Production) Tj ET
+0.090 0.420 0.300 rg
+45.00 638.89 505.28 20.00 re f
+1.000 1.000 1.000 rg
+BT /F2 10 Tf 55.00 643.89 Td (1. SYSTEM ARCHITECTURE & REPOSITORY TOPOLOGY) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 9 Tf 50.00 624.89 Td (CampusCart is architected as a high-performance monorepo with an AJIO-inspired e-commerce frontend,) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 9 Tf 50.00 610.89 Td (a resilient TypeScript Express micro-backend, dual Supabase PostgreSQL cloud storage, and Firebase OAuth.) Tj ET
+0.970 0.980 0.990 rg
+45.00 495.89 161.76 90.00 re f
+0.820 0.880 0.940 RG
+2.00 w 45.00 585.89 m 206.76 585.89 l S
+0.100 0.300 0.600 rg
+BT /F2 9.5 Tf 53.00 569.89 Td (FRONTEND SPA) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 53.00 553.89 Td (- React 18 & TypeScript 5) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 53.00 539.89 Td (- Vite 5 Build Engine) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 53.00 525.89 Td (- Tailwind CSS 3.4 Design) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 53.00 511.89 Td (- Lucide Iconography Suite) Tj ET
+0.990 0.980 0.950 rg
+216.76 495.89 161.76 90.00 re f
+0.900 0.700 0.300 RG
+2.00 w 216.76 585.89 m 378.52 585.89 l S
+0.600 0.400 0.100 rg
+BT /F2 9.5 Tf 224.76 569.89 Td (BACKEND API) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 224.76 553.89 Td (- Node.js 20+ & Express.js) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 224.76 539.89 Td (- TypeScript Strict Mode) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 224.76 525.89 Td (- Multer Multipart Media) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 224.76 511.89 Td (- Vercel Serverless Function) Tj ET
+0.950 0.990 0.970 rg
+388.52 495.89 161.76 90.00 re f
+0.150 0.650 0.450 RG
+2.00 w 388.52 585.89 m 550.28 585.89 l S
+0.090 0.420 0.300 rg
+BT /F2 9.5 Tf 396.52 569.89 Td (CLOUD & SECURITY) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 396.52 553.89 Td (- Supabase Cloud PostgreSQL) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 396.52 539.89 Td (- Supabase Cloud Storage) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 396.52 525.89 Td (- Firebase Google Workspace) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 396.52 511.89 Td (- Gemini 2.0 Multi-Modal AI) Tj ET
+0.090 0.420 0.300 rg
+45.00 452.89 505.28 20.00 re f
+1.000 1.000 1.000 rg
+BT /F2 10 Tf 55.00 457.89 Td (2. FRONTEND TECHNOLOGY SPECIFICATIONS) Tj ET
+0.150 0.200 0.250 rg
+45.00 426.89 505.28 19.00 re f
+1.000 1.000 1.000 rg
+BT /F2 8.5 Tf 51.00 430.89 Td (Layer / Component) Tj ET
+1.000 1.000 1.000 rg
+BT /F2 8.5 Tf 165.00 430.89 Td (Technology Choice) Tj ET
+1.000 1.000 1.000 rg
+BT /F2 8.5 Tf 290.00 430.89 Td (Version) Tj ET
+1.000 1.000 1.000 rg
+BT /F2 8.5 Tf 350.00 430.89 Td (Key Architectural Purpose) Tj ET
+0.970 0.980 0.990 rg
+45.00 407.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 411.89 Td (UI Framework) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 411.89 Td (React) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 411.89 Td (v18.3.1) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 411.89 Td (Component hierarchy, virtual DOM, fast declarative rendering) Tj ET
+1.000 1.000 1.000 rg
+45.00 388.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 392.89 Td (Language) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 392.89 Td (TypeScript) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 392.89 Td (v5.7.3) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 392.89 Td (Complete end-to-end static type safety, DTO interface contracts) Tj ET
+0.970 0.980 0.990 rg
+45.00 369.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 373.89 Td (Build Tooling) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 373.89 Td (Vite) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 373.89 Td (v5.4.14) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 373.89 Td (Sub-second Hot Module Replacement \(HMR\) & Rollup tree-shaking) Tj ET
+1.000 1.000 1.000 rg
+45.00 350.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 354.89 Td (Styling System) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 354.89 Td (Tailwind CSS) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 354.89 Td (v3.4.17) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 354.89 Td (Utility-first design tokens with AJIO-grade custom dark mode) Tj ET
+0.970 0.980 0.990 rg
+45.00 331.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 335.89 Td (CSS Post-Processor) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 335.89 Td (PostCSS & Autoprefixer) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 335.89 Td (v8.5.1) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 335.89 Td (Cross-browser vendor prefixing and CSS modern standard parsing) Tj ET
+1.000 1.000 1.000 rg
+45.00 312.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 316.89 Td (Iconography Suite) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 316.89 Td (Lucide React) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 316.89 Td (v0.475.0) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 316.89 Td (Tree-shakable clean SVG icons \(ShieldCheck, MapPin, Cart, etc.\)) Tj ET
+0.970 0.980 0.990 rg
+45.00 293.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 297.89 Td (Client Storage SDK) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 297.89 Td (@supabase/supabase-js) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 297.89 Td (v2.118.0) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 297.89 Td (Direct client-side synchronization and asset URL generation) Tj ET
+1.000 1.000 1.000 rg
+45.00 274.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 278.89 Td (Auth Client SDK) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 278.89 Td (Firebase Auth Web) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 278.89 Td (v13.1.0) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 278.89 Td (OAuth2 popup flow, Google Workspace SSO & token validation) Tj ET
+0.970 0.980 0.990 rg
+45.00 255.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 259.89 Td (State Management) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 259.89 Td (React Context API) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 259.89 Td (Native 18) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 259.89 Td (Zero-dependency global stores: AuthContext, CartContext, Wishlist) Tj ET
+0.090 0.420 0.300 rg
+45.00 217.89 505.28 20.00 re f
+1.000 1.000 1.000 rg
+BT /F2 10 Tf 55.00 222.89 Td (3. BACKEND & API RUNTIME ARCHITECTURE) Tj ET
+0.150 0.200 0.250 rg
+45.00 191.89 505.28 19.00 re f
+1.000 1.000 1.000 rg
+BT /F2 8.5 Tf 51.00 195.89 Td (Layer / Component) Tj ET
+1.000 1.000 1.000 rg
+BT /F2 8.5 Tf 165.00 195.89 Td (Technology Choice) Tj ET
+1.000 1.000 1.000 rg
+BT /F2 8.5 Tf 290.00 195.89 Td (Version) Tj ET
+1.000 1.000 1.000 rg
+BT /F2 8.5 Tf 350.00 195.89 Td (Key Architectural Purpose) Tj ET
+0.970 0.980 0.990 rg
+45.00 172.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 176.89 Td (Server Runtime) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 176.89 Td (Node.js \(LTS\)) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 176.89 Td (v20.x / 22.x) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 176.89 Td (Asynchronous non-blocking event-driven request lifecycle) Tj ET
+1.000 1.000 1.000 rg
+45.00 153.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 157.89 Td (Web Framework) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 157.89 Td (Express.js) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 157.89 Td (v4.21.2) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 157.89 Td (RESTful router endpoints, middleware pipelines, static uploads) Tj ET
+0.970 0.980 0.990 rg
+45.00 134.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 138.89 Td (TypeScript Runner) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 138.89 Td (tsx & tsc) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 138.89 Td (v4.19.2) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 138.89 Td (Live fast development server watcher and production compilation) Tj ET
+1.000 1.000 1.000 rg
+45.00 115.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 119.89 Td (Schema Validation) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 119.89 Td (Zod) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 119.89 Td (v3.24.1) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 119.89 Td (Runtime type inference, request body validation, schema sanitization) Tj ET
+0.970 0.980 0.990 rg
+45.00 96.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 100.89 Td (CORS Management) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 100.89 Td (cors) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 100.89 Td (v2.8.5) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 100.89 Td (Cross-Origin Resource Sharing policy for localhost and Vercel domains) Tj ET
+1.000 1.000 1.000 rg
+45.00 77.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 81.89 Td (Multipart Uploads) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 81.89 Td (Multer) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 81.89 Td (v1.4.5) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 81.89 Td (Disk & buffer multipart stream parser with MIME and 5MB size limits) Tj ET
+0.970 0.980 0.990 rg
+45.00 58.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 62.89 Td (Environment Manager) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 62.89 Td (dotenv) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 62.89 Td (v16.4.7) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 62.89 Td (Secure configuration loader for cloud connection strings and secrets) Tj ET
+1.000 1.000 1.000 rg
+45.00 39.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 43.89 Td (Serverless Wrapper) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 165.00 43.89 Td (Vercel Node Adapter) Tj ET
+0.400 0.400 0.400 rg
+BT /F3 8 Tf 290.00 43.89 Td (api/index.ts) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 350.00 43.89 Td (Exports Express instance directly for zero-cold-start cloud execution) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 3 0 R
+   /MediaBox [0 0 595.28 841.89]
+   /Contents 11 0 R
+   /Resources << /Font << /F1 4 0 R /F2 5 0 R /F3 6 0 R /F4 7 0 R >> >>
+>>
+endobj
+11 0 obj
+<< /Length 7124 >>
+stream
+0.090 0.420 0.300 RG
+1.50 w 45.00 806.89 m 550.28 806.89 l S
+0.090 0.420 0.300 rg
+BT /F2 8.5 Tf 45.00 811.89 Td (CampusCart -- Technical Stack & System Architecture) Tj ET
+0.500 0.500 0.500 rg
+BT /F1 8.5 Tf 420.28 811.89 Td (Confidential / Engineering Spec) Tj ET
+0.850 0.850 0.850 RG
+0.75 w 45.00 35.00 m 550.28 35.00 l S
+0.500 0.500 0.500 rg
+BT /F1 8 Tf 45.00 24.00 Td (CampusCart | G.L. Bajaj Institute of Technology & Management) Tj ET
+0.300 0.300 0.300 rg
+BT /F2 8 Tf 495.28 24.00 Td (Page 2 of 2) Tj ET
+0.090 0.420 0.300 rg
+45.00 758.89 505.28 20.00 re f
+1.000 1.000 1.000 rg
+BT /F2 10 Tf 55.00 763.89 Td (4. DATABASE & CLOUD STORAGE ARCHITECTURE) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 50.00 746.89 Td (CampusCart features a dual-persistence high-resilience storage architecture:) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 50.00 733.89 Td (1. Supabase PostgreSQL Cloud: Enterprise relational database hosting complete DDL schemas \(001 and 002 migrations\)) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 50.00 720.89 Td (   including tables for colleges, departments, users, categories, products, condition audits, meetups, and messages.) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 50.00 707.89 Td (2. Supabase Storage \(S3-Compatible\): Cloud object bucket \('product-images'\) with public CDN endpoints for student uploads.) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 50.00 694.89 Td (3. Unified In-Memory Store Fallback: Local database store allowing instantaneous offline and demo operation with auto-sync.) Tj ET
+0.090 0.420 0.300 rg
+45.00 651.89 505.28 20.00 re f
+1.000 1.000 1.000 rg
+BT /F2 10 Tf 55.00 656.89 Td (5. AUTHENTICATION & ACCESS CONTROL \(FIREBASE GOOGLE SSO\)) Tj ET
+0.150 0.200 0.250 rg
+45.00 625.89 505.28 19.00 re f
+1.000 1.000 1.000 rg
+BT /F2 8.5 Tf 51.00 629.89 Td (Feature / Security Rule) Tj ET
+1.000 1.000 1.000 rg
+BT /F2 8.5 Tf 235.00 629.89 Td (Technical Implementation Mechanism) Tj ET
+0.970 0.980 0.990 rg
+45.00 606.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 610.89 Td (Google Workspace OAuth) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 8 Tf 235.00 610.89 Td (Firebase Web Authentication SDK v13 with GoogleAuthProvider popup interface) Tj ET
+1.000 1.000 1.000 rg
+45.00 587.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 591.89 Td (College Domain Gating) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 8 Tf 235.00 591.89 Td (Validates accounts matching 'admission_number@glbitm.ac.in' and '@gibitm.ac.in') Tj ET
+0.970 0.980 0.990 rg
+45.00 568.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 572.89 Td (Fallback / Guest Auth) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 8 Tf 235.00 572.89 Td (Permits verified '@gmail.com' student testing with auto-mapped admission roll numbers) Tj ET
+1.000 1.000 1.000 rg
+45.00 549.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 553.89 Td (Role-Based Access Control) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 8 Tf 235.00 553.89 Td (Strictly separates 'STUDENT' permissions from 'COLLEGE_ADMIN' moderation permissions) Tj ET
+0.970 0.980 0.990 rg
+45.00 530.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 534.89 Td (Session Management) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 8 Tf 235.00 534.89 Td (Local token caching with zero server session leakage and instantaneous client logout) Tj ET
+0.090 0.420 0.300 rg
+45.00 492.89 505.28 20.00 re f
+1.000 1.000 1.000 rg
+BT /F2 10 Tf 55.00 497.89 Td (6. AI PRODUCT CONDITION & RESTRICTED POLICY PIPELINE) Tj ET
+0.150 0.200 0.250 rg
+45.00 466.89 505.28 19.00 re f
+1.000 1.000 1.000 rg
+BT /F2 8.5 Tf 51.00 470.89 Td (Module Name) Tj ET
+1.000 1.000 1.000 rg
+BT /F2 8.5 Tf 205.00 470.89 Td (Technology & Core Engine) Tj ET
+1.000 1.000 1.000 rg
+BT /F2 8.5 Tf 355.00 470.89 Td (Functionality & Safety Verification) Tj ET
+0.970 0.980 0.990 rg
+45.00 447.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 451.89 Td (Image Quality Analyzer) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 205.00 451.89 Td (Visual Heuristics + Gemini) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 355.00 451.89 Td (Screens for camera motion blur, low light, glare, and cropped framing) Tj ET
+1.000 1.000 1.000 rg
+45.00 428.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 432.89 Td (Category Classifier) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 205.00 432.89 Td (Computer Vision + Rules) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 355.00 432.89 Td (Prevents category mismatches \(e.g. household items in Engineering Drawing\)) Tj ET
+0.970 0.980 0.990 rg
+45.00 409.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 413.89 Td (Consistency Checker) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 205.00 413.89 Td (NLP Text-Image Matching) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 355.00 413.89 Td (Cross-references seller textual condition claims with photographic evidence) Tj ET
+1.000 1.000 1.000 rg
+45.00 390.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 394.89 Td (Policy Detector) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 205.00 394.89 Td (Restricted Term Database) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 355.00 394.89 Td (Flags exam materials, weapons, unapproved chemicals, or illicit substances) Tj ET
+0.970 0.980 0.990 rg
+45.00 371.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 375.89 Td (Condition Appraisal) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 205.00 375.89 Td (Visual Surface Grading) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 355.00 375.89 Td (Evaluates wear and scores item as NEW, LIKE_NEW, GOOD, or FAIR) Tj ET
+1.000 1.000 1.000 rg
+45.00 352.89 505.28 19.00 re f
+0.100 0.100 0.100 rg
+BT /F2 8 Tf 51.00 356.89 Td (Decision Synthesizer) Tj ET
+0.090 0.420 0.300 rg
+BT /F1 8 Tf 205.00 356.89 Td (Algorithmic Score Model) Tj ET
+0.250 0.250 0.250 rg
+BT /F1 7.8 Tf 355.00 356.89 Td (Computes calibrated trust score \(0-100\) and routes to Admin queue) Tj ET
+0.090 0.420 0.300 rg
+45.00 314.89 505.28 20.00 re f
+1.000 1.000 1.000 rg
+BT /F2 10 Tf 55.00 319.89 Td (7. DEVOPS, HOSTING & CI/CD INFRASTRUCTURE) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 50.00 302.89 Td (- Production Platform: Vercel Cloud \(Unified Edge Network with automatic HTTPS and global caching\).) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 50.00 288.89 Td (- Monorepo Architecture: Root 'package.json' with npm workspaces \('client', 'server'\) and isolated build targets.) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 50.00 274.89 Td (- Git Repository: Hosted at GitHub \('https://github.com/pranav080506/CampusCart.git'\) with automated branch deployment.) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 50.00 260.89 Td (- Serverless Function: 'api/index.ts' automatically executes the Express API on Vercel without requiring a standalone VPS.) Tj ET
+0.200 0.200 0.200 rg
+BT /F1 8.5 Tf 50.00 246.89 Td (- Security Standard: Sensitive secrets \(.env files, service keys\) strictly isolated from version control via '.gitignore'.) Tj ET
+0.950 0.980 0.960 rg
+45.00 187.89 505.28 30.00 re f
+0.090 0.420 0.300 RG
+0.50 w 45.00 187.89 m 550.28 187.89 l S
+0.50 w 45.00 217.89 m 550.28 217.89 l S
+0.090 0.420 0.300 rg
+BT /F2 8.5 Tf 60.00 199.89 Td (Document Certified for Campus Deployment  -  GLBITM Academic Season 2026-2027) Tj ET
+endstream
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000110 00000 n 
+0000000174 00000 n 
+0000000271 00000 n 
+0000000373 00000 n 
+0000000478 00000 n 
+0000000587 00000 n 
+0000000758 00000 n 
+0000011647 00000 n 
+0000011820 00000 n 
+trailer
+<< /Size 12
+   /Root 1 0 R
+   /Info << /Title (CampusCart Technology Stack & System Architecture) /Creator (CampusCart Architecture Suite) >>
+>>
+startxref
+18997
+%%EOF
