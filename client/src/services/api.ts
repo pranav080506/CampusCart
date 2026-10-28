@@ -1,6 +1,17 @@
 import { Product, Category, College, User, CartItem, ModerationAuditLog, AIVerificationResult, CampusMeetupHub, MeetupSession, ChatMessage } from '../types';
 
-const BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const getBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  // If running in browser over https (e.g. on Vercel), avoid localhost Mixed Content errors
+  if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+    if (!envUrl || envUrl.includes('localhost') || envUrl.includes('127.0.0.1')) {
+      return '/api';
+    }
+  }
+  return envUrl || '/api';
+};
+
+const BASE_URL = getBaseUrl();
 
 export const api = {
   // Products

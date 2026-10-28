@@ -140,7 +140,8 @@ export const signInWithGoogle = async (): Promise<FirebaseUser> => {
       throw new Error('Firebase network request failed: Please check your internet connection or disable any ad-blocker / Brave Shields blocking firebaseapp.com.');
     }
     if (error.code === 'auth/unauthorized-domain') {
-      throw new Error('Domain unauthorized in Firebase: Please add your current domain (e.g. localhost or your vercel.app domain) to Firebase Console > Authentication > Settings > Authorized domains.');
+      const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'your-deployment.vercel.app';
+      throw new Error(`Domain "${currentHost}" is not authorized in Firebase! Fix: Open Firebase Console > Authentication > Settings > Authorized domains > Click "Add domain" and enter "${currentHost}" (or "vercel.app").`);
     }
     if (error.code === 'auth/operation-not-allowed') {
       throw new Error('Google Sign-in is NOT enabled in Firebase Console: Go to Firebase Console > Authentication > Sign-in method > Click "Google" > Click "Enable" > Choose Support Email > Save.');
