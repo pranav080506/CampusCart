@@ -41,7 +41,7 @@ interface AuthModalProps {
   onSuccess?: () => void;
 }
 
-const ALLOWED_COLLEGE_DOMAINS = ['gibitm.ac.in', 'glbitm.ac.in'];
+const ALLOWED_COLLEGE_DOMAINS = ['gibitm.ac.in', 'glbitm.ac.in', 'gmail.com'];
 const PRIMARY_DOMAIN = 'gibitm.ac.in';
 
 export const AuthModal: React.FC<AuthModalProps> = ({

@@ -3,8 +3,8 @@ import { db } from '../db/database';
 
 const router = Router();
 
-// Allowed institution domains strictly enforced for GL Bajaj (supports admission_number@glbitm.ac.in and @gibitm.ac.in)
-const ALLOWED_COLLEGE_DOMAINS = ['glbitm.ac.in', 'gibitm.ac.in'];
+// Allowed institution domains for GL Bajaj (supports admission_number@glbitm.ac.in, @gibitm.ac.in, and student @gmail.com)
+const ALLOWED_COLLEGE_DOMAINS = ['glbitm.ac.in', 'gibitm.ac.in', 'gmail.com'];
 
 const isCollegeEmail = (email: string): boolean => {
   if (!email || typeof email !== 'string') return false;

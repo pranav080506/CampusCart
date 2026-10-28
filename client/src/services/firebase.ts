@@ -98,9 +98,7 @@ export const initializeFirebase = (customConfig?: FirebaseConfig): { app: Fireba
     auth = getAuth(app);
     googleProvider = new GoogleAuthProvider();
     googleProvider.setCustomParameters({
-      prompt: 'select_account',
-      // Hint to prioritize college google account domain
-      hd: 'gibitm.ac.in'
+      prompt: 'select_account'
     });
 
     return { app, auth };
@@ -124,23 +122,27 @@ export const signInWithGoogle = async (): Promise<FirebaseUser> => {
   }
 
   if (!auth || !googleProvider) {
-    throw new Error('Firebase Authentication is not configured yet. Please configure your Firebase Web App credentials.');
+    throw new Error('Firebase Authentication is not initialized. Please verify your Firebase project settings.');
   }
 
   try {
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
   } catch (error: any) {
+    console.error('Firebase signInWithPopup error:', error);
     if (error.code === 'auth/popup-closed-by-user') {
       throw new Error('Google sign-in popup was closed before completing verification.');
     }
     if (error.code === 'auth/unauthorized-domain') {
-      throw new Error('Domain unauthorized in Firebase: Please add "localhost" to your Firebase Console > Authentication > Settings > Authorized domains.');
+      throw new Error('Domain unauthorized in Firebase: Please add your current domain (e.g. localhost or your vercel.app domain) to Firebase Console > Authentication > Settings > Authorized domains.');
     }
     if (error.code === 'auth/operation-not-allowed') {
-      throw new Error('Google Sign-in is not enabled in Firebase Console. Please enable it in Authentication > Sign-in method.');
+      throw new Error('Google Sign-in is NOT enabled in Firebase Console: Go to Firebase Console > Authentication > Sign-in method > Click "Google" > Click "Enable" > Choose Support Email > Save.');
     }
-    throw new Error(error.message || 'Firebase Google Sign-In failed.');
+    if (error.code === 'auth/invalid-api-key') {
+      throw new Error('Invalid Firebase API Key. Please verify VITE_FIREBASE_API_KEY in your .env file.');
+    }
+    throw new Error(error.message || `Google Sign-In failed (${error.code || 'unknown'}).`);
   }
 };
 
