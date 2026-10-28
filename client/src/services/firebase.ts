@@ -57,9 +57,17 @@ export const getActiveFirebaseConfig = (): FirebaseConfig => {
   }
 
   const env = (import.meta as any).env || {};
+  let authDomain = env.VITE_FIREBASE_AUTH_DOMAIN || DEFAULT_FIREBASE_CONFIG.authDomain;
+
+  // On deployed domains (e.g. *.vercel.app), use same-origin authDomain.
+  // The Vercel rewrite proxies /__/auth/* to Firebase, eliminating the "missing initial state" error!
+  if (typeof window !== 'undefined' && window.location.hostname && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
+    authDomain = window.location.hostname;
+  }
+
   return {
     apiKey: env.VITE_FIREBASE_API_KEY || DEFAULT_FIREBASE_CONFIG.apiKey,
-    authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || DEFAULT_FIREBASE_CONFIG.authDomain,
+    authDomain,
     projectId: env.VITE_FIREBASE_PROJECT_ID || DEFAULT_FIREBASE_CONFIG.projectId,
     storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || DEFAULT_FIREBASE_CONFIG.storageBucket,
     messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || DEFAULT_FIREBASE_CONFIG.messagingSenderId,
@@ -132,6 +140,9 @@ export const signInWithGoogle = async (): Promise<FirebaseUser> => {
     console.error('Firebase signInWithPopup error:', error);
     if (error.code === 'auth/popup-closed-by-user') {
       throw new Error('Google sign-in popup was closed before completing verification.');
+    }
+    if (error.message?.includes('missing initial state') || error.code === 'auth/missing-initial-state') {
+      throw new Error('Browser storage partitioned or cookies blocked: Please allow third-party cookies or turn off Brave Shields for this site, or use the Instant Student Login button below.');
     }
     if (error.code === 'auth/popup-blocked') {
       throw new Error('Popup blocked by browser: Please allow popups for this site in your browser address bar.');
