@@ -7,6 +7,13 @@ const router = Router();
 router.get('/', (_req: Request, res: Response) => {
   try {
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.json({
+        success: true,
+        items: [],
+        count: 0
+      });
+    }
     const items = db.getWishlist(user.id);
     res.json({
       success: true,
@@ -27,6 +34,9 @@ router.post('/toggle', (req: Request, res: Response) => {
     }
 
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Please sign in to save items to your wishlist.' });
+    }
     const result = db.toggleWishlist(user.id, productId);
 
     res.json({

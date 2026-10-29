@@ -71,184 +71,18 @@ class DatabaseStore {
   private categories: Category[] = [...seedCategories];
   private users: User[] = [...seedUsers];
   private products: Product[] = [...seedProducts];
-  private verificationResults: AIVerificationResult[] = seedProducts
-    .filter(p => p.verificationResult)
-    .map(p => p.verificationResult!);
+  private verificationResults: AIVerificationResult[] = [];
   private auditLogs: ModerationAuditLog[] = [...seedAuditLogs];
   private wishlist: Map<string, Set<string>> = new Map(); // userId -> Set of productIds
   private cart: Map<string, CartItem[]> = new Map(); // userId -> CartItem[]
   private campusHubs: CampusMeetupHub[] = [...seedCampusHubs];
-  private bargainOffers: BargainOffer[] = [
-    {
-      id: 'off-seed-1',
-      productId: 'prod-1',
-      productTitle: 'Omega Deluxe Mini Drafter Set with Protractor Head',
-      productImage: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80',
-      originalListingPrice: 650,
-      offeredPrice: 550,
-      buyerId: 'usr-student-1',
-      buyerName: 'Rohan Sharma',
-      buyerEmail: 'rohan.sharma@glbitm.ac.in',
-      sellerId: 'usr-student-2',
-      sellerName: 'Ananya Iyer',
-      sellerEmail: 'ananya.iyer@glbitm.ac.in',
-      status: 'PENDING',
-      buyerMessage: 'Hi Ananya! I have Engineering Graphics workshop tomorrow. Can pay ₹550 cash or UPI right away at B.Tech canteen!',
-      aiAcceptanceProbability: 82,
-      aiDealFeedback: 'Fair Offer (15% discount). High acceptance probability on campus.',
-      createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-      updatedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-      history: [
-        {
-          id: 'hist-seed-1',
-          actor: 'BUYER',
-          actorName: 'Rohan Sharma',
-          action: 'OFFER_MADE',
-          price: 550,
-          message: 'Hi Ananya! I have Engineering Graphics workshop tomorrow. Can pay ₹550 cash or UPI right away at B.Tech canteen!',
-          timestamp: new Date(Date.now() - 3600000 * 5).toISOString()
-        }
-      ]
-    },
-    {
-      id: 'off-seed-2',
-      productId: 'prod-2',
-      productTitle: 'Casio FX-991CW ClassWiz Non-Programmable Scientific Calculator',
-      productImage: 'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?w=800&auto=format&fit=crop&q=80',
-      originalListingPrice: 1150,
-      offeredPrice: 950,
-      buyerId: 'usr-student-3',
-      buyerName: 'Kabir Verma',
-      buyerEmail: 'kabir.verma@glbitm.ac.in',
-      sellerId: 'usr-student-1',
-      sellerName: 'Rohan Sharma',
-      sellerEmail: 'rohan.sharma@glbitm.ac.in',
-      status: 'COUNTERED',
-      buyerMessage: 'Would you do ₹950? Need it for semester exams.',
-      counterPrice: 1050,
-      sellerMessage: 'How about ₹1,050? The calculator is practically new with bill & warranty.',
-      aiAcceptanceProbability: 70,
-      aiDealFeedback: 'Counter-offer active. Close to seller target margin.',
-      createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-      updatedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-      history: [
-        {
-          id: 'hist-seed-2a',
-          actor: 'BUYER',
-          actorName: 'Kabir Verma',
-          action: 'OFFER_MADE',
-          price: 950,
-          message: 'Would you do ₹950? Need it for semester exams.',
-          timestamp: new Date(Date.now() - 3600000 * 12).toISOString()
-        },
-        {
-          id: 'hist-seed-2b',
-          actor: 'SELLER',
-          actorName: 'Rohan Sharma',
-          action: 'COUNTERED',
-          price: 1050,
-          message: 'How about ₹1,050? The calculator is practically new with bill & warranty.',
-          timestamp: new Date(Date.now() - 3600000 * 3).toISOString()
-        }
-      ]
-    }
-  ];
-  private meetupSessions: MeetupSession[] = [
-    {
-      id: 'meet-seed-1',
-      orderId: 'ORD-CAMPUS-9421',
-      productId: 'prod-1',
-      productTitle: 'Omega Deluxe Mini Drafter Set with Protractor Head',
-      productImage: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80',
-      productPrice: 650,
-      buyerId: 'usr-student-1',
-      buyerName: 'Rohan Sharma',
-      buyerContact: {
-        email: 'rohan.sharma@glbitm.ac.in',
-        phone: '+91 98765 12045',
-        hostel: 'Boys Hostel Block B (Room 214)'
-      },
-      sellerId: 'usr-student-2',
-      sellerName: 'Ananya Iyer',
-      sellerContact: {
-        email: 'ananya.iyer@glbitm.ac.in',
-        phone: '+91 98111 88421',
-        hostel: 'Girls Hostel Block A (Room 108)'
-      },
-      hubLocation: 'B.Tech Canteen',
-      hubLandmark: 'B.Tech Food Court & Indoor Cafeteria Hall',
-      meetingDate: 'Tomorrow (28 Oct)',
-      timeSlot: '05:00 PM - 05:30 PM',
-      proposedBy: 'BUYER',
-      buyerAgreed: true,
-      sellerAgreed: true,
-      status: 'MUTUALLY_AGREED',
-      buyerNotes: 'I finish workshop at 4:45 PM. Will be waiting by the steps in dark blue jacket.',
-      sellerNotes: 'Sounds great! I will bring the original storage bag and clips.',
-      handoverCode: 'CC-SAC-8392',
-      createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-      updatedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-      history: [
-        {
-          id: 'hist-1',
-          timestamp: new Date(Date.now() - 3600000 * 4).toISOString(),
-          actor: 'BUYER',
-          actorName: 'Rohan Sharma',
-          action: 'PROPOSED',
-          hubLocation: 'B.Tech Canteen',
-          meetingDate: 'Tomorrow (28 Oct)',
-          timeSlot: '05:00 PM - 05:30 PM',
-          note: 'Proposed initial B.Tech Canteen meetup after workshop'
-        },
-        {
-          id: 'hist-2',
-          timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
-          actor: 'SELLER',
-          actorName: 'Ananya Iyer',
-          action: 'CONFIRMED',
-          hubLocation: 'B.Tech Canteen',
-          meetingDate: 'Tomorrow (28 Oct)',
-          timeSlot: '05:00 PM - 05:30 PM',
-          note: 'Confirmed! Mutually agreed by both parties.'
-        }
-      ],
-      messages: [
-        {
-          id: 'msg-1',
-          senderId: 'usr-student-1',
-          senderName: 'Rohan Sharma',
-          senderRole: 'BUYER',
-          text: 'Hi Ananya! I finish my mechanical workshop at 4:45 PM. Can we meet near B.Tech Canteen?',
-          timestamp: new Date(Date.now() - 3600000 * 3).toISOString()
-        },
-        {
-          id: 'msg-2',
-          senderId: 'usr-student-2',
-          senderName: 'Ananya Iyer',
-          senderRole: 'SELLER',
-          text: 'Hey Rohan, yes B.Tech Canteen works great for me! I will bring the original box and drawing clips too.',
-          timestamp: new Date(Date.now() - 3600000 * 2.5).toISOString()
-        },
-        {
-          id: 'msg-3',
-          senderId: 'usr-student-1',
-          senderName: 'Rohan Sharma',
-          senderRole: 'BUYER',
-          text: 'Awesome, thank you! I will be wearing a navy blue GL Bajaj hoodie.',
-          timestamp: new Date(Date.now() - 3600000 * 2).toISOString()
-        }
-      ]
-    }
-  ];
+  private bargainOffers: BargainOffer[] = [];
+  private meetupSessions: MeetupSession[] = [];
   private activeCollegeId: string = 'col-glbajaj';
-  private currentUserId: string = 'usr-student-1'; // Default active user (Rohan)
+  private currentUserId: string | null = null;
 
   constructor() {
-    // Initial wishlist seeds
-    this.wishlist.set('usr-student-1', new Set(['prod-2', 'prod-4']));
-    this.cart.set('usr-student-1', [
-      { id: 'cart-1', userId: 'usr-student-1', productId: 'prod-5', quantity: 1 }
-    ]);
+    // Initial collections start empty for authentic user data entry
   }
 
   // --- College Operations ---
@@ -293,9 +127,12 @@ class DatabaseStore {
   }
 
   // --- User Operations ---
-  public getCurrentUser(): User {
-    const u = this.users.find(usr => usr.id === this.currentUserId);
-    return u || this.users[0];
+  public getCurrentUser(): User | null {
+    if (this.currentUserId) {
+      const u = this.users.find(usr => usr.id === this.currentUserId);
+      if (u) return u;
+    }
+    return this.users.length > 0 ? this.users[0] : null;
   }
 
   public getUsers(): User[] {
@@ -338,7 +175,7 @@ class DatabaseStore {
     return newUser;
   }
 
-  public setCurrentUser(userId: string): User {
+  public setCurrentUser(userId: string): User | null {
     const u = this.users.find(usr => usr.id === userId);
     if (u) {
       this.currentUserId = u.id;
@@ -701,10 +538,15 @@ class DatabaseStore {
     }
 
     const buyer = params.buyerId ? this.users.find(u => u.id === params.buyerId) || this.getCurrentUser() : this.getCurrentUser();
+    if (!buyer) {
+      throw new Error('Authentication required for meetup proposal.');
+    }
     const seller = this.users.find(u => u.id === product.sellerId) || {
       id: product.sellerId,
       fullName: product.sellerName || 'Campus Seller',
-      email: 'seller@campus.edu'
+      email: 'seller@campus.edu',
+      phone: '',
+      hostel: 'Campus Hostel'
     };
 
     const newMeetup: MeetupSession = {
@@ -717,16 +559,16 @@ class DatabaseStore {
       buyerId: buyer.id,
       buyerName: buyer.fullName,
       buyerContact: {
-        email: buyer.email || 'rohan.sharma@glbitm.ac.in',
-        phone: '+91 98765 12045',
-        hostel: 'Boys Hostel Block B (Room 214)'
+        email: buyer.email || 'student@glbitm.ac.in',
+        phone: buyer.phone || '',
+        hostel: buyer.hostel || 'Campus Hostel'
       },
       sellerId: seller.id,
       sellerName: seller.fullName,
       sellerContact: {
-        email: seller.email || 'ananya.iyer@glbitm.ac.in',
-        phone: '+91 98111 88421',
-        hostel: 'Girls Hostel Block A (Room 108)'
+        email: seller.email || 'seller@glbitm.ac.in',
+        phone: (seller as any).phone || '',
+        hostel: (seller as any).hostel || 'Campus Hostel'
       },
       hubLocation: params.hubLocation,
       hubLandmark: params.hubLandmark || '',

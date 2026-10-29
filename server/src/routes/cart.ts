@@ -14,6 +14,14 @@ const computeSubtotal = (items: any[]) =>
 router.get('/', (_req: Request, res: Response) => {
   try {
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.json({
+        success: true,
+        items: [],
+        itemCount: 0,
+        subtotal: 0
+      });
+    }
     const items = db.getCart(user.id);
     const subtotal = computeSubtotal(items);
 
@@ -37,6 +45,9 @@ router.post('/add', (req: Request, res: Response) => {
     }
 
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Please log in to add items to your cart.' });
+    }
     const items = db.addToCart(user.id, productId, quantity || 1, agreedPrice, bargainOfferId);
     const subtotal = computeSubtotal(items);
 
@@ -57,6 +68,9 @@ router.put('/update', (req: Request, res: Response) => {
   try {
     const { cartItemId, quantity } = req.body;
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Please log in to manage your cart.' });
+    }
     const items = db.updateCartItem(user.id, cartItemId, Number(quantity));
     const subtotal = computeSubtotal(items);
 
@@ -76,6 +90,9 @@ router.delete('/:cartItemId', (req: Request, res: Response) => {
   try {
     const { cartItemId } = req.params;
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Please log in to manage your cart.' });
+    }
     const items = db.updateCartItem(user.id, cartItemId, 0);
     const subtotal = computeSubtotal(items);
 
@@ -95,6 +112,9 @@ router.delete('/:cartItemId', (req: Request, res: Response) => {
 router.post('/checkout', (req: Request, res: Response) => {
   try {
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Please log in to proceed to checkout.' });
+    }
     const items = db.getCart(user.id);
     if (items.length === 0) {
       return res.status(400).json({ success: false, error: 'Your cart is empty.' });

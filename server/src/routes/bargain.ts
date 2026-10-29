@@ -7,6 +7,14 @@ const router = Router();
 router.get('/offers', (_req: Request, res: Response) => {
   try {
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.json({
+        success: true,
+        incoming: [],
+        outgoing: [],
+        totalActiveOffers: 0
+      });
+    }
     const { incoming, outgoing } = db.getBargainOffers(user.id);
 
     res.json({
@@ -25,6 +33,13 @@ router.get('/product/:productId', (req: Request, res: Response) => {
   try {
     const { productId } = req.params;
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.json({
+        success: true,
+        hasActiveOffer: false,
+        offer: null
+      });
+    }
     const offer = db.getBargainOfferByProductAndBuyer(productId, user.id);
 
     res.json({
@@ -51,6 +66,9 @@ router.post('/make-offer', (req: Request, res: Response) => {
     }
 
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Please sign in to place bargain offers.' });
+    }
     const offer = db.createBargainOffer({
       productId,
       buyerId: user.id,
@@ -83,6 +101,9 @@ router.post('/raise-offer', (req: Request, res: Response) => {
     }
 
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Please sign in to raise your offer.' });
+    }
     const offer = db.raiseBargainOffer({
       offerId,
       buyerId: user.id,
@@ -109,6 +130,9 @@ router.post('/respond', (req: Request, res: Response) => {
     }
 
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Please sign in to respond to offers.' });
+    }
     const offer = db.respondToBargainOffer({
       offerId,
       responderId: user.id,
@@ -141,6 +165,9 @@ router.post('/accept-counter', (req: Request, res: Response) => {
     }
 
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Please sign in to accept counter-offers.' });
+    }
     const offer = db.acceptCounterOffer(offerId, user.id);
 
     res.json({
@@ -174,6 +201,9 @@ router.post('/buy-accepted', (req: Request, res: Response) => {
     }
 
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Please sign in to complete checkout.' });
+    }
     const items = db.addToCart(user.id, offer.productId, 1, offer.offeredPrice, offer.id);
     const subtotal = items.reduce((sum, item) => {
       const unit = item.agreedPrice !== undefined ? item.agreedPrice : (item.product?.price || 0);

@@ -447,23 +447,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <div className="flex-1 space-y-2">
               <p className="font-semibold">{errorMsg}</p>
-              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-red-200/60 dark:border-red-800/60">
-                <button
-                  type="button"
-                  onClick={() => handleSimulatedGoogleSelect('2023me10452@gibitm.ac.in', 'Rohan Sharma')}
-                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition-all flex items-center gap-1 shadow-xs"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  <span>Instant Student Login (Rohan) →</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsGoogleChooserOpen(true)}
-                  className="px-2.5 py-1 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold text-[11px] transition-all"
-                >
-                  Configure Firebase / Test Accounts
-                </button>
-              </div>
             </div>
           </div>
         )}
@@ -524,27 +507,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </button>
 
               {/* Instant 1-Click Fast Student Entry */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                <button
-                  type="button"
-                  onClick={() => handleSimulatedGoogleSelect('pranavgupta080506@gmail.com', 'Pranav Gupta')}
-                  disabled={isSubmitting}
-                  className="w-full py-2 px-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 border border-blue-300 dark:border-blue-700/60 text-blue-800 dark:text-blue-200 font-bold text-xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.99] disabled:opacity-60"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
-                  <span>Enter as Pranav Gupta →</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSimulatedGoogleSelect('2023me10452@gibitm.ac.in', 'Rohan Sharma')}
-                  disabled={isSubmitting}
-                  className="w-full py-2 px-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700/60 text-emerald-800 dark:text-emerald-200 font-bold text-xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.99] disabled:opacity-60"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Enter as Rohan Sharma →</span>
-                </button>
-              </div>
-
               {/* Divider */}
               <div className="relative my-3">
                 <div className="absolute inset-0 flex items-center">
@@ -552,17 +514,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
                 <div className="relative flex justify-center text-[10px] uppercase tracking-wider font-semibold">
                   <span className="bg-white dark:bg-surface-dark-card px-3 text-ink-secondary dark:text-gray-400">
-                    or use GLBITM student credentials
+                    or use official college credentials
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* In Login mode: Quick 1-Click test accounts */}
-            {mode === 'login' && (
+            {/* In Login mode: Registered accounts shortcut if any exist */}
+            {mode === 'login' && availableUsers.length > 0 && (
               <div className="p-3 rounded-xl bg-surface-subtle dark:bg-surface-dark-page border border-surface-border dark:border-surface-dark-border">
                 <div className="text-[11px] font-semibold text-ink-secondary dark:text-gray-400 mb-2 flex items-center justify-between">
-                  <span>Quick Test Login (Pre-verified students):</span>
+                  <span>Your Registered Accounts:</span>
                   <span className="text-[10px] text-brand dark:text-emerald-400 font-bold">1-Click Fill</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
@@ -984,59 +946,39 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
               )}
 
-              {/* TAB 2: INSTANT PRE-VERIFIED TEST ACCOUNTS */}
+              {/* TAB 2: INSTANT GOOGLE ADMISSION VERIFICATION */}
               {firebaseModalTab === 'quick_test' && (
                 <div className="space-y-2.5">
                   <p className="text-gray-500 text-[11px]">
-                    Click any student account below to test instant Google Workspace admission verification:
+                    Enter your college email or admission number to verify student enrollment and sign in:
                   </p>
 
-                  <button
-                    type="button"
-                    onClick={() => handleSimulatedGoogleSelect('pranavgupta080506@gmail.com', 'Pranav Gupta')}
-                    className="w-full p-2.5 rounded-xl border border-blue-200 dark:border-blue-900 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-left flex items-center justify-between transition-colors"
-                  >
-                    <div>
-                      <p className="font-bold text-ink-primary dark:text-white">Pranav Gupta (Developer & Student)</p>
-                      <p className="text-[11px] text-gray-500 font-mono">pranavgupta080506@gmail.com</p>
+                  {availableUsers.length > 0 && (
+                    <div className="space-y-1.5 mb-2">
+                      <p className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">Previously Registered Accounts:</p>
+                      {availableUsers.map((u) => (
+                        <button
+                          key={u.id}
+                          type="button"
+                          onClick={() => handleSimulatedGoogleSelect(u.email, u.fullName)}
+                          className="w-full p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-left flex items-center justify-between transition-colors"
+                        >
+                          <div>
+                            <p className="font-bold text-ink-primary dark:text-white">{u.fullName}</p>
+                            <p className="text-[11px] text-gray-500 font-mono">{u.email}</p>
+                          </div>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 px-2 py-0.5 rounded-full font-bold">
+                            {u.studentId || (u.role === 'COLLEGE_ADMIN' ? 'Admin' : 'Student')}
+                          </span>
+                        </button>
+                      ))}
                     </div>
-                    <span className="text-[10px] bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded-full font-bold">
-                      Verified
-                    </span>
-                  </button>
+                  )}
 
-                  <button
-                    type="button"
-                    onClick={() => handleSimulatedGoogleSelect('2023me10452@gibitm.ac.in', 'Rohan Sharma')}
-                    className="w-full p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-left flex items-center justify-between transition-colors"
-                  >
-                    <div>
-                      <p className="font-bold text-ink-primary dark:text-white">Rohan Sharma (ME)</p>
-                      <p className="text-[11px] text-gray-500 font-mono">2023me10452@gibitm.ac.in</p>
-                    </div>
-                    <span className="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 px-2 py-0.5 rounded-full font-bold">
-                      Admission ID
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleSimulatedGoogleSelect('2022cs10214@gibitm.ac.in', 'Ananya Iyer')}
-                    className="w-full p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-left flex items-center justify-between transition-colors"
-                  >
-                    <div>
-                      <p className="font-bold text-ink-primary dark:text-white">Ananya Iyer (CS)</p>
-                      <p className="text-[11px] text-gray-500 font-mono">2022cs10214@gibitm.ac.in</p>
-                    </div>
-                    <span className="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 px-2 py-0.5 rounded-full font-bold">
-                      Admission ID
-                    </span>
-                  </button>
-
-                  {/* Custom admission ID test input */}
+                  {/* Custom admission ID input */}
                   <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
                     <label className="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">
-                      Or test your admission_number@{PRIMARY_DOMAIN}:
+                      Enter your admission_number@{PRIMARY_DOMAIN} or college email:
                     </label>
                     <div className="flex gap-1.5">
                       <input

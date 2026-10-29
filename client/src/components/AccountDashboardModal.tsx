@@ -1277,45 +1277,44 @@ export const AccountDashboardModal: React.FC<AccountDashboardModalProps> = ({
         </div>
 
         {/* Footer: Authentic Account Persona Switcher */}
-        <div className="p-4 border-t border-surface-border dark:border-surface-dark-border bg-surface-subtle dark:bg-surface-dark-subtle">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2 text-ink-secondary dark:text-gray-400">
-              <Users className="w-4 h-4 text-brand" />
-              <span>
-                Switch Authentic Account Persona:
-              </span>
-            </div>
+        {availableUsers && availableUsers.length > 0 && (
+          <div className="p-4 border-t border-surface-border dark:border-surface-dark-border bg-surface-subtle dark:bg-surface-dark-subtle">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-ink-secondary dark:text-gray-400">
+                <Users className="w-4 h-4 text-brand" />
+                <span>
+                  Switch Account Persona:
+                </span>
+              </div>
 
-            <div className="flex flex-wrap items-center gap-1.5">
-              {availableUsers.map((u) => {
-                const isSelected = user?.id === u.id;
-                const isRohan = u.id === 'usr-student-1';
-                const isAnanya = u.id === 'usr-student-2';
+              <div className="flex flex-wrap items-center gap-1.5">
+                {availableUsers.map((u) => {
+                  const isSelected = user?.id === u.id;
+                  const isAdmin = u.role === 'COLLEGE_ADMIN' || u.role === 'SUPER_ADMIN';
 
-                return (
-                  <button
-                    key={u.id}
-                    onClick={() => switchUser(u.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 border ${
-                      isSelected
-                        ? isAnanya
-                          ? 'bg-purple-700 text-white border-purple-700 shadow-xs'
-                          : 'bg-brand text-white border-brand shadow-xs'
-                        : 'bg-white dark:bg-surface-dark-card text-ink-primary dark:text-gray-200 border-surface-border dark:border-surface-dark-border hover:border-gray-400'
-                    }`}
-                  >
-                    {isRohan ? '🎓' : isAnanya ? '💼' : '🛡️'}
-                    <span>{u.fullName.split(' ')[0]}</span>
-                    <span className="text-[10px] font-normal opacity-85">
-                      ({isRohan ? 'Buyer' : isAnanya ? 'Seller' : 'Admin'})
-                    </span>
-                    {isSelected && <UserCheck className="w-3.5 h-3.5" />}
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={u.id}
+                      onClick={() => switchUser(u.id)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 border ${
+                        isSelected
+                          ? 'bg-brand text-white border-brand shadow-xs'
+                          : 'bg-white dark:bg-surface-dark-card text-ink-primary dark:text-gray-200 border-surface-border dark:border-surface-dark-border hover:border-gray-400'
+                      }`}
+                    >
+                      {isAdmin ? '🛡️' : '🎓'}
+                      <span>{u.fullName.split(' ')[0]}</span>
+                      <span className="text-[10px] font-normal opacity-85">
+                        ({isAdmin ? 'Admin' : u.department || 'Student'})
+                      </span>
+                      {isSelected && <UserCheck className="w-3.5 h-3.5" />}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

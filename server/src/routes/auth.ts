@@ -185,6 +185,9 @@ router.post('/switch-user', (req: Request, res: Response) => {
     const { userId } = req.body;
     const user = db.setCurrentUser(userId);
     const college = db.getActiveCollege();
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found.' });
+    }
     res.json({
       success: true,
       message: `Switched context to ${user.fullName} (${user.role})`,

@@ -96,6 +96,12 @@ router.post('/', async (req: Request, res: Response) => {
     const category = categories.find(c => c.id === categoryId);
     const categoryName = category ? category.name : 'Other Approved Products';
     const currentUser = db.getCurrentUser();
+    if (!currentUser) {
+      return res.status(401).json({
+        success: false,
+        error: 'Please sign in or register with your college email to list an item.'
+      });
+    }
     const activeCollege = db.getActiveCollege();
 
     const productId = `prod-${Date.now()}`;

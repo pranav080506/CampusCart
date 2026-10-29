@@ -332,36 +332,37 @@ export const Header: React.FC<HeaderProps> = ({
                     </button>
                   </div>
 
-                  <div className="py-1">
-                    <div className="px-4 py-1 text-[11px] font-semibold uppercase text-ink-secondary dark:text-gray-400">
-                      Switch Student / Admin Persona
-                    </div>
-                    {availableUsers.map((u) => {
-                      const isRohan = u.id === 'usr-student-1';
-                      const isAnanya = u.id === 'usr-student-2';
+                  {availableUsers && availableUsers.length > 0 && (
+                    <div className="py-1">
+                      <div className="px-4 py-1 text-[11px] font-semibold uppercase text-ink-secondary dark:text-gray-400">
+                        Switch Student / Admin Persona
+                      </div>
+                      {availableUsers.map((u) => {
+                        const isAdmin = u.role === 'COLLEGE_ADMIN' || u.role === 'SUPER_ADMIN';
 
-                      return (
-                        <button
-                          key={u.id}
-                          onClick={() => { switchUser(u.id); setIsAccountOpen(false); }}
-                          className={`w-full text-left px-4 py-2 text-xs flex items-center justify-between hover:bg-surface-subtle dark:hover:bg-surface-dark-subtle transition-colors ${
-                            user?.id === u.id ? 'font-bold text-brand dark:text-emerald-400' : 'text-ink-primary dark:text-gray-200'
-                          }`}
-                        >
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <span>{isRohan ? '🎓' : isAnanya ? '💼' : '🛡️'}</span>
-                              <span>{u.fullName}</span>
+                        return (
+                          <button
+                            key={u.id}
+                            onClick={() => { switchUser(u.id); setIsAccountOpen(false); }}
+                            className={`w-full text-left px-4 py-2 text-xs flex items-center justify-between hover:bg-surface-subtle dark:hover:bg-surface-dark-subtle transition-colors ${
+                              user?.id === u.id ? 'font-bold text-brand dark:text-emerald-400' : 'text-ink-primary dark:text-gray-200'
+                            }`}
+                          >
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span>{isAdmin ? '🛡️' : '🎓'}</span>
+                                <span>{u.fullName}</span>
+                              </div>
+                              <div className="text-[10px] text-ink-secondary dark:text-gray-400">
+                                {isAdmin ? 'College Admin Persona' : `${u.department || 'Verified Student'} (${u.studentId || 'Enrolled'})`}
+                              </div>
                             </div>
-                            <div className="text-[10px] text-ink-secondary dark:text-gray-400">
-                              {isRohan ? 'Buyer Account (Mechanical Eng)' : isAnanya ? 'Seller Account (Computer Science)' : 'College Admin Persona'}
-                            </div>
-                          </div>
-                          {user?.id === u.id && <UserCheck className="w-4 h-4 text-brand" />}
-                        </button>
-                      );
-                    })}
-                  </div>
+                            {user?.id === u.id && <UserCheck className="w-4 h-4 text-brand" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
 
                   {/* Create Account & Login */}
                   <div className="py-1 border-b border-surface-border dark:border-surface-dark-border">

@@ -17,6 +17,9 @@ router.get('/hubs', (_req: Request, res: Response) => {
 router.get('/', (req: Request, res: Response) => {
   try {
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.json({ success: true, meetups: [] });
+    }
     const meetups = db.getMeetups(user.id);
     res.json({ success: true, meetups });
   } catch (error: any) {
@@ -49,8 +52,14 @@ router.post('/propose', (req: Request, res: Response) => {
       });
     }
 
+    const currentUser = db.getCurrentUser();
+    if (!currentUser) {
+      return res.status(401).json({ success: false, error: 'Please sign in to coordinate campus meetups.' });
+    }
+
     const session = db.createMeetupSession({
       productId,
+      buyerId: currentUser.id,
       hubLocation,
       hubLandmark,
       meetingDate,
@@ -72,6 +81,16 @@ router.post('/propose', (req: Request, res: Response) => {
 router.get('/account/summary', (req: Request, res: Response) => {
   try {
     const user = db.getCurrentUser();
+    if (!user) {
+      return res.json({
+        success: true,
+        user: null,
+        buyerMeetups: [],
+        sellerMeetups: [],
+        totalBuyerOrders: 0,
+        totalSellerSales: 0
+      });
+    }
     const allMeetups = db.getMeetups(user.id);
     const buyerMeetups = allMeetups.filter(m => m.buyerId === user.id);
     const sellerMeetups = allMeetups.filter(m => m.sellerId === user.id);
@@ -107,6 +126,9 @@ router.post('/:id/respond', (req: Request, res: Response) => {
     }
 
     const currentUser = db.getCurrentUser();
+    if (!currentUser) {
+      return res.status(401).json({ success: false, error: 'Authentication required.' });
+    }
 
     // Authenticate actor strictly from session identity
     let verifiedActor: 'BUYER' | 'SELLER';
@@ -153,6 +175,9 @@ router.post('/:id/verify-code', (req: Request, res: Response) => {
   try {
     const { code } = req.body;
     const currentUser = db.getCurrentUser();
+    if (!currentUser) {
+      return res.status(401).json({ success: false, error: 'Authentication required.' });
+    }
     const session = db.getMeetupById(req.params.id);
 
     if (!session) {
@@ -219,6 +244,9 @@ router.post('/:id/messages', (req: Request, res: Response) => {
     }
 
     const currentUser = db.getCurrentUser();
+    if (!currentUser) {
+      return res.status(401).json({ success: false, error: 'Authentication required to send messages.' });
+    }
 
     // Authenticate sender role strictly from logged-in user
     let verifiedSenderRole: 'BUYER' | 'SELLER';

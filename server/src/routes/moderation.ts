@@ -53,8 +53,8 @@ router.post('/:productId/action', (req: Request, res: Response) => {
     }
 
     const currentUser = db.getCurrentUser();
-    const adminName = currentUser.fullName || 'Authorized College Admin';
-    const adminId = currentUser.id;
+    const adminName = currentUser ? currentUser.fullName : 'Authorized College Admin';
+    const adminId = currentUser ? currentUser.id : 'usr-admin-system';
 
     const result = db.recordModerationAction({
       productId,
